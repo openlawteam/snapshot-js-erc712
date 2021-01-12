@@ -1,0 +1,10 @@
+{
+  "name": "snapshot-js-erc712",
+  "version": "1.0.0",
+  "description": "Implementation of ERC-712 structure signatures.",
+  "main": "erc712.js",
+  "license": "MIT",
+	"dependencies": {
+    "eth-sig-util": "^3.0.0"
+	}		
+}

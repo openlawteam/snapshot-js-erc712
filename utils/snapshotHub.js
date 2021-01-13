@@ -84,8 +84,8 @@ export const buildVoteMessage = (vote, proposal, addr, chainId) => {
         },
       },
       timestamp: timestamp,
-      token: message.token, //this token represents the space token registered in snapshot-hub
-      space: message.space,
+      token: proposal.token, //this token represents the space token registered in snapshot-hub
+      space: proposal.space,
       type: "vote",
       version: snapshotHubMessageVersion,
       actionId: proposal.actionId,

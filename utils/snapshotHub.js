@@ -7,7 +7,7 @@ const addHours = (ts, hours) => {
   return (date.getTime() / 1e3).toFixed();
 };
 
-export const buildDraftMessage = (message, chainId, token, space) => {
+export const buildDraftMessage = (message, chainId) => {
   const currentDate = new Date();
   const timestamp = (currentDate.getTime() / 1e3).toFixed();
   const newMessage = {
@@ -24,8 +24,8 @@ export const buildDraftMessage = (message, chainId, token, space) => {
         },
       },
       timestamp: timestamp,
-      token: token, //this token represents the space token registered in snapshot-hub
-      space: space, //needs to be registered in snapshot-hub api
+      token: message.token, //this token represents the space token registered in snapshot-hub
+      space: message.space, //needs to be registered in snapshot-hub api
       type: message.type,
       actionId: message.actionId,
       version: snapshotHubMessageVersion,
@@ -37,7 +37,7 @@ export const buildDraftMessage = (message, chainId, token, space) => {
   return newMessage;
 };
 
-export const buildProposalMessage = (message, chainId, token, space) => {
+export const buildProposalMessage = (message, chainId) => {
   const currentDate = new Date();
   const timestamp = (currentDate.getTime() / 1e3).toFixed();
   const newMessage = {
@@ -57,8 +57,8 @@ export const buildProposalMessage = (message, chainId, token, space) => {
         },
       },
       timestamp: timestamp,
-      token: token, //this token represents the space token registered in snapshot-hub
-      space: space, //needs to be registered in snapshot-hub api
+      token: message.token, //this token represents the space token registered in snapshot-hub
+      space: message.space, //needs to be registered in snapshot-hub api
       type: message.type,
       actionId: message.actionId,
       version: snapshotHubMessageVersion,
@@ -70,14 +70,7 @@ export const buildProposalMessage = (message, chainId, token, space) => {
   return newMessage;
 };
 
-export const buildVoteMessage = (
-  vote,
-  proposal,
-  addr,
-  chainId,
-  token,
-  space
-) => {
+export const buildVoteMessage = (vote, proposal, addr, chainId) => {
   const currentDate = new Date();
   const timestamp = (currentDate.getTime() / 1e3).toFixed();
   return {
@@ -91,8 +84,8 @@ export const buildVoteMessage = (
         },
       },
       timestamp: timestamp,
-      token: token, //this token represents the space token registered in snapshot-hub
-      space: space,
+      token: message.token, //this token represents the space token registered in snapshot-hub
+      space: message.space,
       type: "vote",
       version: snapshotHubMessageVersion,
       actionId: proposal.actionId,

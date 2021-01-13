@@ -364,6 +364,17 @@ const prepareVoteProposalPayload = (payload) => {
   };
 };
 
+export const signMessage = (provider, signer, data, callback) => {
+  return provider.sendAsync(
+    {
+      method: "eth_signTypedData_v4",
+      params: [signer, data],
+      from: signer,
+    },
+    callback
+  );
+};
+
 export const verifySignature = (
   message,
   address,

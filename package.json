@@ -1,8 +1,8 @@
 {
   "name": "@fforbeck/snapshot-js-erc712",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Implementation of ERC-712 structure signatures.",
-  "main": "erc712.js",
+  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",

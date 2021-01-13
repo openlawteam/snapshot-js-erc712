@@ -1,3 +1,4 @@
+import axios from "axios";
 const snapshotHubMessageVersion = "0.2.0"; //needs to match snapshot-hub api version
 
 const addHours = (ts, hours) => {
@@ -99,4 +100,35 @@ export const buildVoteMessage = (
       verifyingContract: proposal.verifyingContract,
     },
   };
+};
+
+export const submitMessage = (snapshotHubURL, addr, message, signature) => {
+  const data = {
+    address: addr,
+    msg: JSON.stringify(message),
+    sig: signature,
+  };
+  return axios.post(`${snapshotHubURL}/api/message`, data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+export const getDrafts = (snapshotHubURL, space) => {
+  return axios.get(`${snapshotHubURL}/api/${space}/drafts`);
+};
+
+export const getProposals = (snapshotHubURL, space) => {
+  return axios.get(`${snapshotHubURL}/api/${space}/proposals`);
+};
+
+export const getVotes = (snapshotHubURL, space, proposalId) => {
+  return axios.get(
+    `${snapshotHubURL}/api/${space}/proposal/${proposalId}/votes`
+  );
+};
+
+export const getApiStatus = (snapshotHubURL) => {
+  return axios.get(`${snapshotHubURL}/api`);
 };

@@ -1,0 +1,319 @@
+import axios from "axios";
+
+export enum VoteChoices {
+  No = "No",
+  Yes = "Yes",
+}
+
+export enum SnapshotType {
+  draft = "draft",
+  proposal = "proposal",
+  vote = "vote",
+}
+
+// Ordered vote choices. Do not change the indexes!
+export type CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
+
+export type SnapshotCoreProposalPayloadData = {
+  /**
+   * Readable name of the proposal
+   */
+  name: string;
+  /**
+   * Readable description of the proposal
+   */
+  body: string;
+  /**
+   * Choices for Snapshot vote
+   */
+  choices: CoreProposalVoteChoices;
+  /**
+   * Stringifiable metadata for the proposal, e.g. `private: 1`
+   */
+  metadata: Record<string, any>;
+};
+
+export type SnapshotProposalPayloadData = {
+  /**
+   * Vote start timestamp string (in seconds)
+   */
+  start: string;
+  /**
+   * Vote end timestamp string (in seconds)
+   */
+  end: string;
+};
+
+export type SnapshotCoreProposalData = {
+  /**
+   * Creation timestamp
+   */
+  timestamp: string;
+  /**
+   * Snapshot entity (i.e. "draft", "proposal", "vote")
+   */
+  type: SnapshotType;
+  /**
+   * Version of snapshot-hub api
+   */
+  version: string;
+  /**
+   * Represents the `space` token registered in snapshot-hub.
+   */
+  token: string;
+  /**
+   * Registered space name in the snapshot-hub api
+   */
+  space: string;
+  /**
+   * Intended contract address to use this data. For ERC712 signature verification.
+   */
+  actionId: string;
+  /**
+   * Ethereum network ID. For ERC712 signature verification.
+   */
+  chainId: number;
+  /**
+   * The contract address which will verify the signature. For ERC712 signature verification.
+   */
+  verifyingContract: string;
+};
+
+export type SnapshotDraftData = {
+  /**
+   * Core data about the draft.
+   */
+  payload: SnapshotCoreProposalPayloadData;
+} & SnapshotCoreProposalData;
+
+export type SnapshotProposalData = {
+  /**
+   * Core data about the proposal and its voting.
+   */
+  payload: SnapshotCoreProposalPayloadData & SnapshotProposalPayloadData;
+  /**
+   * Ethereum block to use (e.g. latest).
+   */
+  snapshot: number;
+} & SnapshotCoreProposalData;
+
+export type SnapshotVoteData = {
+  /**
+   * Core data about the vote.
+   */
+  payload: {
+    /**
+     * The choice's index
+     */
+    choice: number;
+    /**
+     * The proposal's IPFS hash
+     */
+    proposalIpfsHash: string;
+    /**
+     * Stringifiable metadata for the proposal, e.g. `private: 1`
+     */
+    metadata: SnapshotCoreProposalPayloadData["metadata"];
+  };
+} & SnapshotCoreProposalData;
+
+export type SnapshotMessage = {
+  name: SnapshotCoreProposalPayloadData["name"];
+  body: SnapshotCoreProposalPayloadData["body"];
+  metadata: SnapshotCoreProposalPayloadData["metadata"];
+  token: SnapshotCoreProposalData["token"];
+  space: SnapshotCoreProposalData["space"];
+  actionId: SnapshotCoreProposalData["actionId"];
+  chainId: SnapshotCoreProposalData["chainId"];
+  verifyingContract: SnapshotCoreProposalData["verifyingContract"];
+};
+
+export type SnapshotMessageProposal = {
+  /**
+   * Ethereum block to use (e.g. latest).
+   */
+  snapshot: SnapshotProposalData["snapshot"];
+  /**
+   * Duration in seconds of the vote.
+   */
+  votingTimeSeconds: number;
+} & SnapshotMessage;
+
+export type SnapshotMessageVote = {
+  /**
+   * Choice to submit for the vote.
+   */
+  choice: VoteChoices;
+  /**
+   * Stringifiable metadata for the proposal, e.g. `private: 1`
+   */
+  metadata: {
+    /**
+     * Allows for a different address other than the `address` voting.
+     * In many cases this will be the same as the `address` field.
+     *
+     * e.g. Calculating membership voting power, but a delegate address was used for `address`.
+     */
+    memberAddress: string;
+  } & Record<string, any>;
+  /**
+   * Ethereum network ID. For ERC712 signature verification.
+   */
+  chainId: number;
+};
+
+export type SnapshotVoteProposal = {
+  actionId: SnapshotCoreProposalData["actionId"];
+  proposalIpfsHash: SnapshotVoteData["payload"]["proposalIpfsHash"];
+  space: SnapshotCoreProposalData["space"];
+  token: SnapshotCoreProposalData["token"];
+  verifyingContract: SnapshotCoreProposalData["verifyingContract"];
+};
+
+const VOTE_CHOICES: CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
+
+const addSecondsTimestamp = (
+  tsSeconds: string,
+  secondsToAdd: number
+): string => {
+  return (parseInt(tsSeconds) + secondsToAdd).toFixed();
+};
+
+const getTimestampSeconds: () => string = () => (Date.now() / 1e3).toFixed();
+
+// @note The snapshot-hub API does not accept falsy choices like index `0`.
+const getVoteChoiceIndex = (choice: VoteChoices) =>
+  VOTE_CHOICES.findIndex((c) => c === choice) + 1;
+
+export const buildDraftMessage = async (
+  message: SnapshotMessage,
+  snapshotHubURL: string
+): Promise<SnapshotDraftData> => {
+  try {
+    const { data } = await getApiStatus(snapshotHubURL);
+
+    return {
+      payload: {
+        body: message.body,
+        choices: VOTE_CHOICES,
+        metadata: message.metadata,
+        name: message.name,
+      },
+      actionId: message.actionId,
+      chainId: message.chainId,
+      space: message.space,
+      timestamp: getTimestampSeconds(),
+      token: message.token,
+      type: SnapshotType.draft,
+      verifyingContract: message.verifyingContract,
+      version: data.version,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const buildProposalMessage = async (
+  message: SnapshotMessageProposal,
+  snapshotHubURL: string
+): Promise<SnapshotProposalData> => {
+  const timestamp = getTimestampSeconds();
+
+  try {
+    const { data } = await getApiStatus(snapshotHubURL);
+
+    return {
+      payload: {
+        body: message.body,
+        choices: VOTE_CHOICES,
+        end: addSecondsTimestamp(timestamp, message.votingTimeSeconds),
+        metadata: message.metadata,
+        name: message.name,
+        start: timestamp,
+      },
+      actionId: message.actionId,
+      chainId: message.chainId,
+      snapshot: message.snapshot,
+      space: message.space,
+      timestamp: timestamp,
+      token: message.token,
+      type: SnapshotType.proposal,
+      verifyingContract: message.verifyingContract,
+      version: data.version,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const buildVoteMessage = async (
+  vote: SnapshotMessageVote,
+  proposal: SnapshotVoteProposal,
+  snapshotHubURL: string
+): Promise<SnapshotVoteData> => {
+  const timestamp = getTimestampSeconds();
+
+  try {
+    const { data } = /* await getApiStatus(snapshotHubURL) */ {
+      data: { version: "1.2.0" },
+    };
+
+    return {
+      payload: {
+        choice: getVoteChoiceIndex(vote.choice),
+        proposalIpfsHash: proposal.proposalIpfsHash,
+        metadata: vote.metadata,
+      },
+      actionId: proposal.actionId,
+      chainId: vote.chainId,
+      space: proposal.space,
+      timestamp: timestamp,
+      token: proposal.token,
+      type: SnapshotType.vote,
+      verifyingContract: proposal.verifyingContract,
+      version: data.version,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const submitMessage = (
+  snapshotHubURL: string,
+  address: string,
+  message: SnapshotDraftData | SnapshotProposalData | SnapshotVoteData,
+  signature: string
+) => {
+  const data = {
+    address,
+    msg: JSON.stringify(message),
+    sig: signature,
+  };
+  return axios.post(`${snapshotHubURL}/api/message`, data, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+export const getDrafts = (snapshotHubURL: string, space: string) => {
+  return axios.get(`${snapshotHubURL}/api/${space}/drafts`);
+};
+
+export const getProposals = (snapshotHubURL: string, space: string) => {
+  return axios.get(`${snapshotHubURL}/api/${space}/proposals`);
+};
+
+export const getVotes = (
+  snapshotHubURL: string,
+  space: string,
+  proposalId: string
+) => {
+  return axios.get(
+    `${snapshotHubURL}/api/${space}/proposal/${proposalId}/votes`
+  );
+};
+
+export const getApiStatus = (snapshotHubURL: string) => {
+  return axios.get(`${snapshotHubURL}/api`);
+};

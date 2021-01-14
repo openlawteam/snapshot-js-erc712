@@ -1,8 +1,12 @@
 {
-  "name": "@fforbeck/snapshot-js-erc712",
-  "version": "1.0.7",
+  "name": "@openlaw/snapshot-js-erc712",
+  "version": "1.0.1",
   "description": "Implementation of ERC-712 structure signatures.",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openlawteam/snapshot-js-erc712.git"
+  },
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
@@ -17,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/openlawteam/snapshot-js-erc712.git"
   },
-  "author": "",
+  "author": "OpenLaw Dev Team",
   "bugs": {
     "url": "https://github.com/openlawteam/snapshot-js-erc712/issues"
   },

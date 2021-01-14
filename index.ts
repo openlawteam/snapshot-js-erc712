@@ -21,15 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import encodeParameter from "web3-utils";
+import { sha3 } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
 import MerkleTree from "./utils/merkleTree";
 
 export const getMessageERC712Hash = (
-  message,
-  verifyingContract,
-  actionId,
-  chainId
+  message: Record<string, any>,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const m = prepareMessage(message);
   const { domain, types } = getDomainDefinition(
@@ -45,14 +45,14 @@ export const getMessageERC712Hash = (
     types: types,
   };
   //TODO do we need to use v4 here?
-  return "0x" + TypedDataUtils.sign(msgParams, true).toString("hex");
+  return "0x" + TypedDataUtils.sign<any>(msgParams, true).toString("hex");
 };
 
 export const getDraftERC712Hash = (
-  message,
-  verifyingContract,
-  actionId,
-  chainId
+  message: Record<string, any>,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const updatedMessage = { ...message, type: "draft" };
 
@@ -65,10 +65,10 @@ export const getDraftERC712Hash = (
 };
 
 export const getDomainDefinition = (
-  message,
-  verifyingContract,
-  actionId,
-  chainId
+  message: Record<string, any>,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   switch (message.type) {
     case "draft":
@@ -88,7 +88,11 @@ export const getDomainDefinition = (
   }
 };
 
-export const getMessageDomainType = (chainId, verifyingContract, actionId) => {
+const getMessageDomainType = (
+  chainId: number,
+  verifyingContract: string,
+  actionId: string
+) => {
   return {
     name: "Snapshot Message",
     version: "4",
@@ -98,10 +102,10 @@ export const getMessageDomainType = (chainId, verifyingContract, actionId) => {
   };
 };
 
-export const getVoteDomainDefinition = (
-  verifyingContract,
-  actionId,
-  chainId
+const getVoteDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 
@@ -124,10 +128,10 @@ export const getVoteDomainDefinition = (
   return { domain, types };
 };
 
-export const getVoteStepDomainDefinition = (
-  verifyingContract,
-  actionId,
-  chainId
+const getVoteStepDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 
@@ -148,10 +152,10 @@ export const getVoteStepDomainDefinition = (
   return { domain, types };
 };
 
-export const getProposalDomainDefinition = (
-  verifyingContract,
-  actionId,
-  chainId
+const getProposalDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 
@@ -175,10 +179,10 @@ export const getProposalDomainDefinition = (
   return { domain, types };
 };
 
-export const getDraftDomainDefinition = (
-  verifyingContract,
-  actionId,
-  chainId
+const getDraftDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 
@@ -224,7 +228,7 @@ export const getDomainType = () => {
   ];
 };
 
-export const prepareMessage = (message) => {
+export const prepareMessage = (message: Record<string, any>) => {
   switch (message.type) {
     case "draft":
       return prepareDraftMessage(message);
@@ -239,28 +243,28 @@ export const prepareMessage = (message) => {
   }
 };
 
-export const prepareVoteMessage = (message) => {
+const prepareVoteMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: prepareVotePayload(message.payload),
   });
 };
 
-export const prepareVotePayload = (payload) => {
+const prepareVotePayload = (payload: Record<string, any>) => {
   return Object.assign(payload, {
     proposalHash: payload.proposalHash,
     choice: payload.choice,
   });
 };
 
-export const prepareProposalMessage = (message) => {
+const prepareProposalMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: prepareProposalPayload(message.payload),
   });
 };
 
-export const prepareProposalPayload = (payload) => {
+const prepareProposalPayload = (payload: Record<string, any>) => {
   return Object.assign(payload, {
     snapshot: payload.snapshot,
     start: payload.start,
@@ -268,35 +272,19 @@ export const prepareProposalPayload = (payload) => {
   });
 };
 
-export const prepareDraftMessage = (message) => {
+const prepareDraftMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: message.payload,
   });
 };
 
-/**
- * {
- * member: undefined,
- * nbNo: 1,
- * nbYes: 0,
- * weight: BN {
- *    negative: 0,
- *    words: [ 1, <1 empty item> ],
- *    length: 1,
- *    red: null
- * },
- * index: 0,
- * sig: undefined,
- * proof: []
- * }
- */
-export const toStepNode = (
-  step,
-  verifyingContract,
-  actionId,
-  chainId,
-  merkleTree
+const toStepNode = (
+  step: any,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number,
+  merkleTree: any
 ) => {
   return {
     account: step.account,
@@ -313,27 +301,11 @@ export const toStepNode = (
   };
 };
 
-export const buildVoteLeafHashForMerkleTree = (
-  leaf,
-  verifyingContract,
-  actionId,
-  chainId
+const createVote = (
+  proposalHash: string,
+  account: string,
+  voteYes: boolean
 ) => {
-  const { domain, types } = getVoteStepDomainDefinition(
-    verifyingContract,
-    actionId,
-    chainId
-  );
-  const msgParams = {
-    domain,
-    message: leaf,
-    primaryType: "Message",
-    types,
-  };
-  return "0x" + TypedDataUtils.sign(msgParams).toString("hex");
-};
-
-export const createVote = (proposalHash, account, voteYes) => {
   const payload = {
     choice: voteYes ? 1 : 2,
     account,
@@ -348,15 +320,35 @@ export const createVote = (proposalHash, account, voteYes) => {
   return vote;
 };
 
-export const prepareVoteResult = async (
-  votes,
-  dao,
-  actionId,
-  chainId,
-  snapshot,
-  shares
+const buildVoteLeafHashForMerkleTree = (
+  leaf: any,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
-  const sortedVotes = votes.sort((a, b) => a.account > b.account);
+  const { domain, types } = getVoteStepDomainDefinition(
+    verifyingContract,
+    actionId,
+    chainId
+  );
+  const msgParams = {
+    domain,
+    message: leaf,
+    primaryType: "Message",
+    types,
+  };
+  return "0x" + TypedDataUtils.sign<any>(msgParams).toString("hex");
+};
+
+const prepareVoteResult = async (
+  votes: any[],
+  dao: any,
+  actionId: string,
+  chainId: number,
+  snapshot: any,
+  shares: any
+) => {
+  const sortedVotes = votes.sort((a: any, b: any) => a.account - b.account);
   const leaves = await Promise.all(
     sortedVotes.map(async (vote) => {
       const weight = await dao.getPriorAmount(
@@ -391,33 +383,34 @@ export const prepareVoteResult = async (
   return { voteResultTree: tree, votes: leaves };
 };
 
-export const prepareVoteProposalData = (data) => {
-  return encodeParameter(
-    {
-      ProposalMessage: {
-        timestamp: "uint256",
-        spaceHash: "string",
-        payload: {
-          nameHash: "string",
-          bodyHash: "string",
-          choices: "string[]",
-          start: "uint256",
-          end: "uint256",
-          snapshot: "string",
-        },
-        sig: "bytes",
-      },
-    },
-    {
-      timestamp: data.timestamp,
-      spaceHash: sha3(data.space),
-      payload: prepareVoteProposalPayload(data.payload),
-      sig: data.sig || "0x",
-    }
-  );
+const prepareVoteProposalData = (data: any) => {
+  // @todo This comes from web3Instance.eth.abi.encodeParameter
+  // @see https://web3js.readthedocs.io/en/v1.3.0/web3-eth-abi.html?highlight=encodeParameter#encodeparameter
+  // return encodeParameter(
+  //   {
+  //     ProposalMessage: {
+  //       timestamp: "uint256",
+  //       space: "string",
+  //       payload: {
+  //         name: "string",
+  //         body: "string",
+  //         choices: "string[]",
+  //         start: "uint256",
+  //         end: "uint256",
+  //         snapshot: "string",
+  //       },
+  //       sig: "bytes",
+  //     },
+  //   },
+  //   {
+  //     timestamp: data.timestamp,
+  //     payload: prepareVoteProposalPayload(data.payload),
+  //     sig: data.sig || "0x",
+  //   }
+  // );
 };
 
-export const prepareVoteProposalPayload = (payload) => {
+const prepareVoteProposalPayload = (payload: any) => {
   return {
     nameHash: sha3(payload.name),
     bodyHash: sha3(payload.body),
@@ -428,7 +421,12 @@ export const prepareVoteProposalPayload = (payload) => {
   };
 };
 
-export const signMessage = (provider, signer, data, callback) => {
+export const signMessage = (
+  provider: any,
+  signer: any,
+  data: any,
+  callback: () => void
+) => {
   return provider.sendAsync(
     {
       method: "eth_signTypedData_v4",
@@ -440,12 +438,12 @@ export const signMessage = (provider, signer, data, callback) => {
 };
 
 export const verifySignature = (
-  message,
-  address,
-  verifyingContract,
-  actionId,
-  chainId,
-  signature
+  message: Record<string, any>,
+  address: string,
+  verifyingContract: string,
+  actionId: string,
+  chainId: number,
+  signature: string
 ) => {
   const { domain, types } = getDomainDefinition(
     message,
@@ -461,43 +459,12 @@ export const verifySignature = (
     types,
   };
 
-  const recoverAddress = recoverTypedSignature_v4({
+  const recoverAddress = recoverTypedSignature_v4<any>({
     data: msgParams,
     sig: signature,
   });
   return address.toLowerCase() === recoverAddress.toLowerCase();
 };
 
-export const Web3Signer = (ethers, account) => {
-  return (m, verifyingContract, actionId, chainId) => {
-    const message = prepareMessage(m);
-    const { domain, types } = getDomainDefinition(
-      message,
-      verifyingContract,
-      actionId,
-      chainId
-    );
-    const signer = ethers.getSigner(account);
-    return signer._signTypedData(domain, types, message);
-  };
-};
-
-export const SigUtilSigner = (privateKeyStr) => {
-  return (m, verifyingContract, actionId, chainId) => {
-    const message = prepareMessage(m);
-    const privateKey = Buffer.from(privateKeyStr, "hex");
-    const { domain, types } = getDomainDefinition(
-      message,
-      verifyingContract,
-      actionId,
-      chainId
-    );
-    const msgParams = {
-      domain,
-      message,
-      primaryType: "Message",
-      types,
-    };
-    return sigUtil.signTypedData_v4(privateKey, { data: msgParams });
-  };
-};
+// Export utilities
+export * from "./utils";

@@ -204,9 +204,9 @@ const getDraftDomainDefinition = (
 };
 
 export const getVoteResultRootDomainDefinition = (
-  verifyingContract,
-  actionId,
-  chainId
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
 ) => {
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 

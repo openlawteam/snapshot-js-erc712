@@ -37,11 +37,11 @@ export type SnapshotProposalPayloadData = {
   /**
    * Vote start timestamp string (in seconds)
    */
-  start: string;
+  start: number;
   /**
    * Vote end timestamp string (in seconds)
    */
-  end: string;
+  end: number;
 };
 
 export type SnapshotCoreProposalData = {
@@ -173,13 +173,13 @@ export type SnapshotVoteProposal = {
 const VOTE_CHOICES: CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
 
 const addSecondsTimestamp = (
-  tsSeconds: string,
+  tsSeconds: number,
   secondsToAdd: number
-): string => {
-  return (parseInt(tsSeconds) + secondsToAdd).toFixed();
+): number => {
+  return tsSeconds + secondsToAdd;
 };
 
-const getTimestampSeconds: () => string = () => (Date.now() / 1e3).toFixed();
+const getTimestampSeconds: () => number = () => Math.floor(Date.now() / 1e3);
 
 // @note The snapshot-hub API does not accept falsy choices like index `0`.
 const getVoteChoiceIndex = (choice: VoteChoices) =>
@@ -202,7 +202,7 @@ export const buildDraftMessage = async (
       actionId: message.actionId,
       chainId: message.chainId,
       space: message.space,
-      timestamp: getTimestampSeconds(),
+      timestamp: getTimestampSeconds().toString(),
       token: message.token,
       type: SnapshotType.draft,
       verifyingContract: message.verifyingContract,
@@ -235,7 +235,7 @@ export const buildProposalMessage = async (
       chainId: message.chainId,
       snapshot: message.snapshot,
       space: message.space,
-      timestamp: timestamp,
+      timestamp: timestamp.toString(),
       token: message.token,
       type: SnapshotType.proposal,
       verifyingContract: message.verifyingContract,
@@ -254,9 +254,7 @@ export const buildVoteMessage = async (
   const timestamp = getTimestampSeconds();
 
   try {
-    const { data } = /* await getApiStatus(snapshotHubURL) */ {
-      data: { version: "1.2.0" },
-    };
+    const { data } = await getApiStatus(snapshotHubURL);
 
     return {
       payload: {
@@ -267,7 +265,7 @@ export const buildVoteMessage = async (
       actionId: proposal.actionId,
       chainId: vote.chainId,
       space: proposal.space,
-      timestamp: timestamp,
+      timestamp: timestamp.toString(),
       token: proposal.token,
       type: SnapshotType.vote,
       verifyingContract: proposal.verifyingContract,

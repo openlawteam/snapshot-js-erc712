@@ -172,13 +172,6 @@ export type SnapshotVoteProposal = {
 
 const VOTE_CHOICES: CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
 
-const addSecondsTimestamp = (
-  tsSeconds: number,
-  secondsToAdd: number
-): number => {
-  return tsSeconds + secondsToAdd;
-};
-
 const getTimestampSeconds: () => number = () => Math.floor(Date.now() / 1e3);
 
 // @note The snapshot-hub API does not accept falsy choices like index `0`.
@@ -226,7 +219,7 @@ export const buildProposalMessage = async (
       payload: {
         body: message.body,
         choices: VOTE_CHOICES,
-        end: addSecondsTimestamp(timestamp, message.votingTimeSeconds),
+        end: timestamp + message.votingTimeSeconds,
         metadata: message.metadata,
         name: message.name,
         start: timestamp,

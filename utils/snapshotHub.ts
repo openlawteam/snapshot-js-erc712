@@ -295,6 +295,10 @@ export const getProposals = (snapshotHubURL: string, space: string) => {
   return axios.get(`${snapshotHubURL}/api/${space}/proposals`);
 };
 
+export const getSpace = (snapshotHubURL: string, space: string) => {
+  return axios.get(`${snapshotHubURL}/api/spaces/${space}`);
+};
+
 export const getVotes = (
   snapshotHubURL: string,
   space: string,

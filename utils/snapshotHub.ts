@@ -107,9 +107,9 @@ export type SnapshotVoteData = {
      */
     choice: number;
     /**
-     * The proposal's IPFS hash
+     * The proposal's ERC712 hash
      */
-    proposalIpfsHash: string;
+    proposalHash: string;
     /**
      * Stringifiable metadata for the proposal, e.g. `private: 1`
      */
@@ -164,7 +164,7 @@ export type SnapshotMessageVote = {
 
 export type SnapshotVoteProposal = {
   actionId: SnapshotCoreProposalData["actionId"];
-  proposalIpfsHash: SnapshotVoteData["payload"]["proposalIpfsHash"];
+  proposalHash: SnapshotVoteData["payload"]["proposalHash"];
   space: SnapshotCoreProposalData["space"];
   token: SnapshotCoreProposalData["token"];
   verifyingContract: SnapshotCoreProposalData["verifyingContract"];
@@ -252,7 +252,7 @@ export const buildVoteMessage = async (
     return {
       payload: {
         choice: getVoteChoiceIndex(vote.choice),
-        proposalIpfsHash: proposal.proposalIpfsHash,
+        proposalHash: proposal.proposalHash,
         metadata: vote.metadata,
       },
       actionId: proposal.actionId,

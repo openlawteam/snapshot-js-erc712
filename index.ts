@@ -120,7 +120,7 @@ const getVoteDomainDefinition = (
     ],
     MessagePayload: [
       { name: "choice", type: "uint256" },
-      { name: "proposalIpfsHash", type: "string" },
+      { name: "proposalHash", type: "string" },
     ],
     EIP712Domain: getDomainType(),
   };
@@ -144,7 +144,7 @@ const getVoteStepDomainDefinition = (
       { name: "nbNo", type: "uint256" },
       { name: "index", type: "uint256" },
       { name: "choice", type: "uint256" },
-      { name: "proposalIpfsHash", type: "bytes32" },
+      { name: "proposalHash", type: "bytes32" },
     ],
     EIP712Domain: getDomainType(),
   };

@@ -421,20 +421,25 @@ const prepareVoteProposalPayload = (payload: any) => {
   };
 };
 
-export const signMessage = (
-  provider: any,
-  signer: any,
-  data: any,
-  callback: () => void
-) => {
-  return provider.sendAsync(
-    {
-      method: "eth_signTypedData_v4",
-      params: [signer, data],
-      from: signer,
-    },
-    callback
-  );
+/**
+ * Signs a message with MetaMask's `request`
+ *
+ *
+ * @note We will replace this with hopefully the ethers.js version.
+ * @note Provider must be via MetaMask's injected Web3 provider
+ *   for this function to work.
+ *
+ * @param provider
+ * @param signer
+ * @param data
+ * @see https://docs.metamask.io/guide/signing-data.html#signing-data-with-metamask
+ */
+export const signMessage = (provider: any, signer: any, data: any) => {
+  return provider.request({
+    method: "eth_signTypedData_v4",
+    params: [signer, data],
+    from: signer,
+  });
 };
 
 export const verifySignature = (

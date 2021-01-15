@@ -126,6 +126,7 @@ export type SnapshotMessage = {
   actionId: SnapshotCoreProposalData["actionId"];
   chainId: SnapshotCoreProposalData["chainId"];
   verifyingContract: SnapshotCoreProposalData["verifyingContract"];
+  timestamp: SnapshotCoreProposalData["timestamp"];
 };
 
 export type SnapshotMessageProposal = {
@@ -210,9 +211,10 @@ export const buildProposalMessage = async (
   message: SnapshotMessageProposal,
   snapshotHubURL: string
 ): Promise<SnapshotProposalData> => {
-  const timestamp = getTimestampSeconds();
-
   try {
+    const timestamp = message.timestamp
+      ? parseInt(message.timestamp)
+      : getTimestampSeconds();
     const { data } = await getApiStatus(snapshotHubURL);
 
     return {

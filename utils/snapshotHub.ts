@@ -42,6 +42,10 @@ export type SnapshotProposalPayloadData = {
    * Vote end timestamp string (in seconds)
    */
   end: number;
+  /**
+   * Ethereum block to use (e.g. latest).
+   */
+  snapshot: number;
 };
 
 export type SnapshotCoreProposalData = {
@@ -91,10 +95,6 @@ export type SnapshotProposalData = {
    * Core data about the proposal and its voting.
    */
   payload: SnapshotCoreProposalPayloadData & SnapshotProposalPayloadData;
-  /**
-   * Ethereum block to use (e.g. latest).
-   */
-  snapshot: number;
 } & SnapshotCoreProposalData;
 
 export type SnapshotVoteData = {
@@ -130,13 +130,13 @@ export type SnapshotMessage = {
 
 export type SnapshotMessageProposal = {
   /**
-   * Ethereum block to use (e.g. latest).
-   */
-  snapshot: SnapshotProposalData["snapshot"];
-  /**
    * Duration in seconds of the vote.
    */
   votingTimeSeconds: number;
+  /**
+   * Ethereum block to use (e.g. latest).
+   */
+  snapshot: number;
 } & SnapshotMessage;
 
 export type SnapshotMessageVote = {
@@ -223,10 +223,10 @@ export const buildProposalMessage = async (
         metadata: message.metadata,
         name: message.name,
         start: timestamp,
+        snapshot: message.snapshot,
       },
       actionId: message.actionId,
       chainId: message.chainId,
-      snapshot: message.snapshot,
       space: message.space,
       timestamp: timestamp.toString(),
       token: message.token,

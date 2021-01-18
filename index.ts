@@ -88,7 +88,7 @@ export const getDomainDefinition = (
   }
 };
 
-const getMessageDomainType = (
+export const getMessageDomainType = (
   chainId: number,
   verifyingContract: string,
   actionId: string
@@ -102,7 +102,7 @@ const getMessageDomainType = (
   };
 };
 
-const getVoteDomainDefinition = (
+export const getVoteDomainDefinition = (
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -128,7 +128,7 @@ const getVoteDomainDefinition = (
   return { domain, types };
 };
 
-const getVoteStepDomainDefinition = (
+export const getVoteStepDomainDefinition = (
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -152,7 +152,7 @@ const getVoteStepDomainDefinition = (
   return { domain, types };
 };
 
-const getProposalDomainDefinition = (
+export const getProposalDomainDefinition = (
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -179,7 +179,7 @@ const getProposalDomainDefinition = (
   return { domain, types };
 };
 
-const getDraftDomainDefinition = (
+export const getDraftDomainDefinition = (
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -243,28 +243,28 @@ export const prepareMessage = (message: Record<string, any>) => {
   }
 };
 
-const prepareVoteMessage = (message: Record<string, any>) => {
+export const prepareVoteMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: prepareVotePayload(message.payload),
   });
 };
 
-const prepareVotePayload = (payload: Record<string, any>) => {
+export const prepareVotePayload = (payload: Record<string, any>) => {
   return Object.assign(payload, {
     proposalHash: payload.proposalHash,
     choice: payload.choice,
   });
 };
 
-const prepareProposalMessage = (message: Record<string, any>) => {
+export const prepareProposalMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: prepareProposalPayload(message.payload),
   });
 };
 
-const prepareProposalPayload = (payload: Record<string, any>) => {
+export const prepareProposalPayload = (payload: Record<string, any>) => {
   return Object.assign(payload, {
     snapshot: payload.snapshot,
     start: payload.start,
@@ -272,14 +272,14 @@ const prepareProposalPayload = (payload: Record<string, any>) => {
   });
 };
 
-const prepareDraftMessage = (message: Record<string, any>) => {
+export const prepareDraftMessage = (message: Record<string, any>) => {
   return Object.assign(message, {
     timestamp: message.timestamp,
     payload: message.payload,
   });
 };
 
-const toStepNode = (
+export const toStepNode = (
   step: any,
   verifyingContract: string,
   actionId: string,
@@ -301,7 +301,7 @@ const toStepNode = (
   };
 };
 
-const createVote = (
+export const createVote = (
   proposalHash: string,
   account: string,
   voteYes: boolean
@@ -320,7 +320,7 @@ const createVote = (
   return vote;
 };
 
-const buildVoteLeafHashForMerkleTree = (
+export const buildVoteLeafHashForMerkleTree = (
   leaf: any,
   verifyingContract: string,
   actionId: string,
@@ -340,7 +340,7 @@ const buildVoteLeafHashForMerkleTree = (
   return "0x" + TypedDataUtils.sign<any>(msgParams).toString("hex");
 };
 
-const prepareVoteResult = async (
+export const prepareVoteResult = async (
   votes: any[],
   dao: any,
   actionId: string,
@@ -383,7 +383,7 @@ const prepareVoteResult = async (
   return { voteResultTree: tree, votes: leaves };
 };
 
-const prepareVoteProposalData = (data: any) => {
+export const prepareVoteProposalData = (data: any) => {
   // @todo This comes from web3Instance.eth.abi.encodeParameter
   // @see https://web3js.readthedocs.io/en/v1.3.0/web3-eth-abi.html?highlight=encodeParameter#encodeparameter
   // return encodeParameter(
@@ -410,7 +410,7 @@ const prepareVoteProposalData = (data: any) => {
   // );
 };
 
-const prepareVoteProposalPayload = (payload: any) => {
+export const prepareVoteProposalPayload = (payload: any) => {
   return {
     nameHash: sha3(payload.name),
     bodyHash: sha3(payload.body),

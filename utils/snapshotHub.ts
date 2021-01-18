@@ -117,7 +117,10 @@ export type SnapshotVoteData = {
   };
 } & SnapshotCoreProposalData;
 
-export type SnapshotMessage = {
+/**
+ * Common arguments for functions which build messages
+ */
+export type SnapshotMessageBase = {
   name: SnapshotCoreProposalPayloadData["name"];
   body: SnapshotCoreProposalPayloadData["body"];
   metadata: SnapshotCoreProposalPayloadData["metadata"];
@@ -126,7 +129,6 @@ export type SnapshotMessage = {
   actionId: SnapshotCoreProposalData["actionId"];
   chainId: SnapshotCoreProposalData["chainId"];
   verifyingContract: SnapshotCoreProposalData["verifyingContract"];
-  timestamp: SnapshotCoreProposalData["timestamp"];
 };
 
 export type SnapshotMessageProposal = {
@@ -138,7 +140,13 @@ export type SnapshotMessageProposal = {
    * Ethereum block to use (e.g. latest).
    */
   snapshot: number;
-} & SnapshotMessage;
+  /**
+   * Optional timestamp string (seconds).
+   * Providing the timestamp is helpful in cases where generated
+   * hashes need to match (i.e. a way to use the same data).
+   */
+  timestamp?: SnapshotCoreProposalData["timestamp"];
+} & SnapshotMessageBase;
 
 export type SnapshotMessageVote = {
   /**
@@ -180,7 +188,7 @@ const getVoteChoiceIndex = (choice: VoteChoices) =>
   VOTE_CHOICES.findIndex((c) => c === choice) + 1;
 
 export const buildDraftMessage = async (
-  message: SnapshotMessage,
+  message: SnapshotMessageBase,
   snapshotHubURL: string
 ): Promise<SnapshotDraftData> => {
   try {

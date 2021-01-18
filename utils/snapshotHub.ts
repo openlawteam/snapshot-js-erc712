@@ -111,9 +111,17 @@ export type SnapshotVoteData = {
      */
     proposalHash: string;
     /**
-     * Stringifiable metadata for the proposal, e.g. `private: 1`
+     * Stringifiable metadata for the vote.
      */
-    metadata: SnapshotCoreProposalPayloadData["metadata"];
+    metadata: {
+      /**
+       * Allows for a different address other than the `address` voting.
+       * In many cases this will be the same as the `address` field.
+       *
+       * e.g. Calculating membership voting power, but a delegate address was used for `address`.
+       */
+      memberAddress: string;
+    } & Record<string, any>;
   };
 } & SnapshotCoreProposalData;
 
@@ -156,15 +164,7 @@ export type SnapshotMessageVote = {
   /**
    * Stringifiable metadata for the proposal, e.g. `private: 1`
    */
-  metadata: {
-    /**
-     * Allows for a different address other than the `address` voting.
-     * In many cases this will be the same as the `address` field.
-     *
-     * e.g. Calculating membership voting power, but a delegate address was used for `address`.
-     */
-    memberAddress: string;
-  } & Record<string, any>;
+  metadata: SnapshotVoteData["payload"]["metadata"];
   /**
    * Ethereum network ID. For ERC712 signature verification.
    */

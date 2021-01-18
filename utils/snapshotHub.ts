@@ -1,5 +1,11 @@
 import axios from "axios";
 
+/**
+ * ------------------
+ * TYPES
+ * ------------------
+ */
+
 export enum VoteChoices {
   No = "No",
   Yes = "Yes",
@@ -179,6 +185,20 @@ export type SnapshotVoteProposal = {
   verifyingContract: SnapshotCoreProposalData["verifyingContract"];
 };
 
+export type SnapshotSubmitBaseReturn = {
+  uniqueId: string;
+};
+
+export type SnapshotSubmitDraftReturn = {
+  uniqueIdDraft: string;
+} & SnapshotSubmitBaseReturn;
+
+/**
+ * ------------------
+ * SNAPSHOT HUB UTILS
+ * ------------------
+ */
+
 const VOTE_CHOICES: CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
 
 const getTimestampSeconds: () => number = () => Math.floor(Date.now() / 1e3);
@@ -279,12 +299,12 @@ export const buildVoteMessage = async (
   }
 };
 
-export const submitMessage = (
+export const submitMessage = <ReturnData extends SnapshotSubmitBaseReturn>(
   snapshotHubURL: string,
   address: string,
   message: SnapshotDraftData | SnapshotProposalData | SnapshotVoteData,
   signature: string
-) => {
+): Promise<{ data: ReturnData }> => {
   const data = {
     address,
     msg: JSON.stringify(message),

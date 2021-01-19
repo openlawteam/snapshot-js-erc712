@@ -189,7 +189,7 @@ export type SnapshotSubmitBaseReturn = {
   uniqueId: string;
 };
 
-export type SnapshotSubmitDraftReturn = {
+export type SnapshotSubmitProposalReturn = {
   uniqueIdDraft: string;
 } & SnapshotSubmitBaseReturn;
 
@@ -299,12 +299,12 @@ export const buildVoteMessage = async (
   }
 };
 
-export const submitMessage = <ReturnData extends SnapshotSubmitBaseReturn>(
+export const submitMessage = <T extends SnapshotSubmitBaseReturn>(
   snapshotHubURL: string,
   address: string,
   message: SnapshotDraftData | SnapshotProposalData | SnapshotVoteData,
   signature: string
-): Promise<{ data: ReturnData }> => {
+): Promise<{ data: T }> => {
   const data = {
     address,
     msg: JSON.stringify(message),

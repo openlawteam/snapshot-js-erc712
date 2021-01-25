@@ -306,6 +306,6 @@ export type SnapshotVoteResponse = Record<
 >;
 
 /**
- * @note Votes are inside an array, unlike Proposals.
+ * @note Votes are inside an array, unlike the Proposals object.
  */
 export type SnapshotVotesResponse = SnapshotVoteResponse[];

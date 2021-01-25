@@ -11,7 +11,7 @@ import {
   SnapshotVoteData,
   SnapshotVoteProposal,
   VoteChoices,
-} from ".";
+} from "./types";
 
 /**
  * ------------------

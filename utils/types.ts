@@ -184,3 +184,94 @@ export type SnapshotSubmitBaseReturn = {
 export type SnapshotSubmitProposalReturn = {
   uniqueIdDraft: string;
 } & SnapshotSubmitBaseReturn;
+
+export type SnapshotProposalResponseData = {
+  address: string;
+  data: {
+    authorIpfsHash: string;
+    /**
+     * The hash of a proposal's draft.
+     * This property will not be present if the proposal does not have a draft.
+     */
+    erc712DraftHash?: string;
+  };
+  msg: {
+    version: string;
+    timestamp: string;
+    token: string;
+    type: SnapshotType.proposal;
+    payload: {
+      body: string;
+      choices: CoreProposalVoteChoices;
+      end: number;
+      metadata: Record<string, any>;
+      name: string;
+      start: number;
+      snapshot: number;
+    };
+  };
+  votes?: SnapshotVoteResponse;
+  sig: string;
+  authorIpfsHash: string;
+  relayerIpfsHash: string;
+  actionId: string;
+};
+
+export type SnapshotProposalResponse = Record<
+  /**
+   * Proposal erc712 content hash
+   */
+  string,
+  /**
+   * Proposal data
+   */
+  SnapshotProposalResponseData
+>;
+
+/**
+ * @note same as `SnapshotProposalResponse` type.
+ */
+export type SnapshotProposalsResponse = SnapshotProposalResponse;
+
+export type SnapshotVoteResponseData = {
+  address: string;
+  msg: {
+    version: string;
+    timestamp: string;
+    token: string;
+    type: SnapshotType.vote;
+    payload: {
+      /**
+       * Index of the vote chosen, i.e 1 = Yes, 2 = No
+       */
+      choice: number;
+      proposalHash: string;
+      metadata: {
+        /**
+         * @see SnapshotVoteData
+         */
+        memberAddress: string;
+      };
+    };
+  };
+  sig: string;
+  authorIpfsHash: string;
+  relayerIpfsHash: string;
+  actionId: string;
+};
+
+export type SnapshotVoteResponse = Record<
+  /**
+   * Address of the voter
+   */
+  string,
+  /**
+   * Vote data
+   */
+  SnapshotVoteResponseData
+>;
+
+/**
+ * @note Votes are inside an array, unlike Proposals.
+ */
+export type SnapshotVotesResponse = SnapshotVoteResponse[];

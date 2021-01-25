@@ -185,6 +185,37 @@ export type SnapshotSubmitProposalReturn = {
   uniqueIdDraft: string;
 } & SnapshotSubmitBaseReturn;
 
+export type SnapshotDraftResponseData = {
+  address: string;
+  msg: {
+    version: string;
+    timestamp: string;
+    token: string;
+    type: SnapshotType.draft;
+    payload: {
+      body: string;
+      choices: CoreProposalVoteChoices;
+      metadata: Record<string, any>;
+      name: string;
+    };
+  };
+  sig: string;
+  authorIpfsHash: string;
+  relayerIpfsHash: string;
+  actionId: string;
+};
+
+export type SnapshotDraftResponse = Record<
+  /**
+   * Proposal erc712 content hash
+   */
+  string,
+  /**
+   * Draft data
+   */
+  SnapshotDraftResponseData
+>;
+
 export type SnapshotProposalResponseData = {
   address: string;
   data: {
@@ -210,6 +241,9 @@ export type SnapshotProposalResponseData = {
       snapshot: number;
     };
   };
+  /**
+   * Votes (`SnapshotVotesResponse`) are optionally included (i.e. requested via query param).
+   */
   votes?: SnapshotVoteResponse;
   sig: string;
   authorIpfsHash: string;

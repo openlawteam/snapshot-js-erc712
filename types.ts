@@ -9,5 +9,5 @@ export type PrepareVoteProposalData = {
   };
   sig: string;
   space: string;
-  timestamp: string;
+  timestamp: number;
 };

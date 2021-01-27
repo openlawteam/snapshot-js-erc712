@@ -388,7 +388,7 @@ export const prepareVoteResult = async (
 export function prepareVoteProposalData(
   data: PrepareVoteProposalData,
   web3Instance: any
-) {
+): string {
   return web3Instance.eth.abi.encodeParameter(
     {
       ProposalMessage: {

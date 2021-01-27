@@ -23,6 +23,8 @@ SOFTWARE.
  */
 import { sha3 } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
+
+import { PrepareVoteProposalData } from "./types";
 import MerkleTree from "./utils/merkleTree";
 
 export const getMessageERC712Hash = (
@@ -383,34 +385,38 @@ export const prepareVoteResult = async (
   return { voteResultTree: tree, votes: leaves };
 };
 
-export const prepareVoteProposalData = (data: any) => {
-  // @todo This comes from web3Instance.eth.abi.encodeParameter
-  // @see https://web3js.readthedocs.io/en/v1.3.0/web3-eth-abi.html?highlight=encodeParameter#encodeparameter
-  // return encodeParameter(
-  //   {
-  //     ProposalMessage: {
-  //       timestamp: "uint256",
-  //       space: "string",
-  //       payload: {
-  //         name: "string",
-  //         body: "string",
-  //         choices: "string[]",
-  //         start: "uint256",
-  //         end: "uint256",
-  //         snapshot: "string",
-  //       },
-  //       sig: "bytes",
-  //     },
-  //   },
-  //   {
-  //     timestamp: data.timestamp,
-  //     payload: prepareVoteProposalPayload(data.payload),
-  //     sig: data.sig || "0x",
-  //   }
-  // );
-};
+export function prepareVoteProposalData(
+  data: PrepareVoteProposalData,
+  web3Instance: any
+) {
+  return web3Instance.eth.abi.encodeParameter(
+    {
+      ProposalMessage: {
+        timestamp: "uint256",
+        spaceHash: "bytes32",
+        payload: {
+          nameHash: "bytes32",
+          bodyHash: "bytes32",
+          choices: "string[]",
+          start: "uint256",
+          end: "uint256",
+          snapshot: "string",
+        },
+        sig: "bytes",
+      },
+    },
+    {
+      timestamp: data.timestamp,
+      spaceHash: sha3(data.space),
+      payload: prepareVoteProposalPayload(data.payload),
+      sig: data.sig || "0x",
+    }
+  );
+}
 
-export const prepareVoteProposalPayload = (payload: any) => {
+export const prepareVoteProposalPayload = (
+  payload: PrepareVoteProposalData["payload"]
+) => {
   return {
     nameHash: sha3(payload.name),
     bodyHash: sha3(payload.body),

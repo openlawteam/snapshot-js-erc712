@@ -187,6 +187,10 @@ export type SnapshotSubmitProposalReturn = {
 
 export type SnapshotDraftResponseData = {
   address: string;
+  data: {
+    authorIpfsHash: string;
+    sponsored: boolean;
+  };
   msg: {
     version: string;
     timestamp: string;

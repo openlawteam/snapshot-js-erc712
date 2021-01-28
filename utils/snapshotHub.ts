@@ -63,16 +63,18 @@ export const buildProposalMessage = async (
     const timestamp = message.timestamp
       ? parseInt(message.timestamp)
       : getTimestampSeconds();
+    const voteStartTimestamp: number = getTimestampSeconds();
+
     const { data } = await getApiStatus(snapshotHubURL);
 
     return {
       payload: {
         body: message.body,
         choices: VOTE_CHOICES,
-        end: timestamp + message.votingTimeSeconds,
+        end: voteStartTimestamp + message.votingTimeSeconds,
         metadata: message.metadata,
         name: message.name,
-        start: timestamp,
+        start: voteStartTimestamp,
         snapshot: message.snapshot,
       },
       actionId: message.actionId,

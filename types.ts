@@ -1,3 +1,5 @@
+import { SnapshotType } from "./utils";
+
 export type PrepareVoteProposalData = {
   payload: {
     body: string;
@@ -12,8 +14,20 @@ export type PrepareVoteProposalData = {
   timestamp: number;
 };
 
+export type PrepareDraftMessageData = {
+  timestamp: number | string;
+  space: string;
+  payload: PrepareDraftMessagePayloadData;
+};
+
+export type PrepareDraftMessagePayloadData = {
+  body: string;
+  choices: string[];
+  name: string;
+};
+
 export type PrepareProposalMessageData = {
-  timestamp: number;
+  timestamp: number | string;
   space: string;
   payload: PrepareProposalPayloadData;
 };
@@ -23,18 +37,30 @@ export type PrepareProposalPayloadData = {
   choices: string[];
   end: number;
   name: string;
-  snapshot: string;
+  snapshot: string | number;
   start: number;
 };
 
 export type PrepareVoteMessageData = {
-  timestamp: number;
+  timestamp: number | string;
   payload: PrepareVoteMessagePayloadData;
 };
 
 export type PrepareVoteMessagePayloadData = {
   choice: 1 | 2;
   proposalHash: string;
+};
+
+export type PrepareDraftMessageReturn = {
+  timestamp: number;
+  spaceHash: string;
+  payload: PrepareDraftMessagePayloadReturn;
+};
+
+export type PrepareDraftMessagePayloadReturn = {
+  bodyHash: string;
+  choices: string[];
+  nameHash: string;
 };
 
 export type PrepareProposalMessageReturn = {
@@ -50,4 +76,8 @@ export type PrepareProposalPayloadReturn = {
   nameHash: string;
   snapshot: string;
   start: number;
+};
+
+export type MessageWithType = Record<string, any> & {
+  type: SnapshotType | "result";
 };

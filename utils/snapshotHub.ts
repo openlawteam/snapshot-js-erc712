@@ -1,6 +1,7 @@
 import axios from "axios";
 import {
   CoreProposalVoteChoices,
+  Erc712Data,
   SnapshotDraftData,
   SnapshotMessageBase,
   SnapshotMessageProposal,
@@ -41,13 +42,10 @@ export const buildDraftMessage = async (
         metadata: message.metadata,
         name: message.name,
       },
-      actionId: message.actionId,
-      chainId: message.chainId,
       space: message.space,
       timestamp: getTimestampSeconds().toString(),
       token: message.token,
       type: SnapshotType.draft,
-      verifyingContract: message.verifyingContract,
       version: data.version,
     };
   } catch (error) {
@@ -77,13 +75,10 @@ export const buildProposalMessage = async (
         start: voteStartTimestamp,
         snapshot: message.snapshot,
       },
-      actionId: message.actionId,
-      chainId: message.chainId,
       space: message.space,
       timestamp: timestamp.toString(),
       token: message.token,
       type: SnapshotType.proposal,
-      verifyingContract: message.verifyingContract,
       version: data.version,
     };
   } catch (error) {
@@ -107,13 +102,10 @@ export const buildVoteMessage = async (
         proposalHash: proposal.proposalHash,
         metadata: vote.metadata,
       },
-      actionId: proposal.actionId,
-      chainId: vote.chainId,
       space: proposal.space,
       timestamp: timestamp.toString(),
       token: proposal.token,
       type: SnapshotType.vote,
-      verifyingContract: proposal.verifyingContract,
       version: data.version,
     };
   } catch (error) {
@@ -125,12 +117,14 @@ export const submitMessage = <T extends SnapshotSubmitBaseReturn>(
   snapshotHubURL: string,
   address: string,
   message: SnapshotDraftData | SnapshotProposalData | SnapshotVoteData,
-  signature: string
+  signature: string,
+  erc712Data: Erc712Data
 ): Promise<{ data: T }> => {
   const data = {
     address,
     msg: JSON.stringify(message),
     sig: signature,
+    erc712Data: JSON.stringify(erc712Data),
   };
   return axios.post(`${snapshotHubURL}/api/message`, data, {
     headers: {

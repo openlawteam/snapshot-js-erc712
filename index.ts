@@ -24,11 +24,25 @@ SOFTWARE.
 import { sha3 } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
 
-import { PrepareVoteProposalData } from "./types";
+import {
+  MessageWithType,
+  PrepareDraftMessageData,
+  PrepareDraftMessagePayloadData,
+  PrepareDraftMessagePayloadReturn,
+  PrepareDraftMessageReturn,
+  PrepareProposalMessageData,
+  PrepareProposalMessageReturn,
+  PrepareProposalPayloadData,
+  PrepareProposalPayloadReturn,
+  PrepareVoteMessageData,
+  PrepareVoteMessagePayloadData,
+  PrepareVoteProposalData,
+} from "./types";
 import MerkleTree from "./utils/merkleTree";
+import { SnapshotType } from "./utils";
 
 export const getMessageERC712Hash = (
-  message: Record<string, any>,
+  message: MessageWithType,
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -51,12 +65,12 @@ export const getMessageERC712Hash = (
 };
 
 export const getDraftERC712Hash = (
-  message: Record<string, any>,
+  message: MessageWithType,
   verifyingContract: string,
   actionId: string,
   chainId: number
 ) => {
-  const updatedMessage = { ...message, type: "draft" };
+  const updatedMessage = { ...message, type: SnapshotType.draft };
 
   return getMessageERC712Hash(
     updatedMessage,
@@ -67,7 +81,7 @@ export const getDraftERC712Hash = (
 };
 
 export const getDomainDefinition = (
-  message: Record<string, any>,
+  message: MessageWithType,
   verifyingContract: string,
   actionId: string,
   chainId: number
@@ -115,14 +129,11 @@ export const getVoteDomainDefinition = (
   const types = {
     Message: [
       { name: "timestamp", type: "uint256" },
-      { name: "token", type: "string" },
-      { name: "type", type: "string" },
-      { name: "space", type: "string" },
       { name: "payload", type: "MessagePayload" },
     ],
     MessagePayload: [
       { name: "choice", type: "uint256" },
-      { name: "proposalHash", type: "string" },
+      { name: "proposalHash", type: "bytes32" },
     ],
     EIP712Domain: getDomainType(),
   };
@@ -164,12 +175,12 @@ export const getProposalDomainDefinition = (
   const types = {
     Message: [
       { name: "timestamp", type: "uint256" },
-      { name: "space", type: "string" },
+      { name: "spaceHash", type: "bytes32" },
       { name: "payload", type: "MessagePayload" },
     ],
     MessagePayload: [
-      { name: "name", type: "string" },
-      { name: "body", type: "string" },
+      { name: "nameHash", type: "bytes32" },
+      { name: "bodyHash", type: "bytes32" },
       { name: "choices", type: "string[]" },
       { name: "start", type: "uint256" },
       { name: "end", type: "uint256" },
@@ -191,12 +202,12 @@ export const getDraftDomainDefinition = (
   const types = {
     Message: [
       { name: "timestamp", type: "uint256" },
-      { name: "space", type: "string" },
+      { name: "spaceHash", type: "bytes32" },
       { name: "payload", type: "MessagePayload" },
     ],
     MessagePayload: [
-      { name: "name", type: "string" },
-      { name: "body", type: "string" },
+      { name: "nameHash", type: "bytes32" },
+      { name: "bodyHash", type: "bytes32" },
       { name: "choices", type: "string[]" },
     ],
     EIP712Domain: getDomainType(),
@@ -230,14 +241,21 @@ export const getDomainType = () => {
   ];
 };
 
-export const prepareMessage = (message: Record<string, any>) => {
+export const prepareMessage = (message: MessageWithType) => {
   switch (message.type) {
+    // @note Probably better to use this function on its own in consuming code, as the types are precise.
     case "draft":
-      return prepareDraftMessage(message);
+      return prepareDraftMessage(
+        (message as unknown) as PrepareDraftMessageData
+      );
+    // @note Probably better to use this function on its own in consuming code, as the types are precise.
     case "vote":
-      return prepareVoteMessage(message);
+      return prepareVoteMessage((message as unknown) as PrepareVoteMessageData);
     case "proposal":
-      return prepareProposalMessage(message);
+      // @note Probably better to use this function on its own in consuming code, as the types are precise.
+      return prepareProposalMessage(
+        (message as unknown) as PrepareProposalMessageData
+      );
     case "result":
       return message;
     default:
@@ -245,41 +263,123 @@ export const prepareMessage = (message: Record<string, any>) => {
   }
 };
 
-export const prepareVoteMessage = (message: Record<string, any>) => {
-  return Object.assign(message, {
-    timestamp: message.timestamp,
+export const prepareVoteMessage = (message: PrepareVoteMessageData) => {
+  const timestampParsed: number =
+    typeof message.timestamp === "string"
+      ? parseInt(message.timestamp)
+      : message.timestamp;
+
+  return {
+    timestamp: timestampParsed,
     payload: prepareVotePayload(message.payload),
-  });
+  };
 };
 
-export const prepareVotePayload = (payload: Record<string, any>) => {
-  return Object.assign(payload, {
+export const prepareVotePayload = (payload: PrepareVoteMessagePayloadData) => {
+  return {
     proposalHash: payload.proposalHash,
     choice: payload.choice,
-  });
+  };
 };
 
-export const prepareProposalMessage = (message: Record<string, any>) => {
-  return Object.assign(message, {
-    timestamp: message.timestamp,
-    payload: prepareProposalPayload(message.payload),
-  });
+export function prepareProposalMessage(
+  message: PrepareProposalMessageData
+): PrepareProposalMessageReturn {
+  try {
+    const spaceHash: string | null = sha3(message.space);
+    const timestampParsed: number =
+      typeof message.timestamp === "string"
+        ? parseInt(message.timestamp)
+        : message.timestamp;
+
+    if (!spaceHash) {
+      throw new Error("Hash of `space` returned empty.");
+    }
+
+    return {
+      spaceHash,
+      timestamp: timestampParsed,
+      payload: prepareProposalMessagePayload(message.payload),
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+export function prepareProposalMessagePayload(
+  payload: PrepareProposalPayloadData
+): PrepareProposalPayloadReturn {
+  try {
+    const nameHash: string | null = sha3(payload.name);
+    const bodyHash: string | null = sha3(payload.body);
+
+    if (!nameHash) {
+      throw new Error("Hash of `name` returned empty");
+    }
+    if (!bodyHash) {
+      throw new Error("Hash of `body` returned empty");
+    }
+
+    return {
+      nameHash,
+      bodyHash,
+      choices: payload.choices,
+      snapshot: payload.snapshot.toString(),
+      start: payload.start,
+      end: payload.end,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const prepareDraftMessage = (
+  message: PrepareDraftMessageData
+): PrepareDraftMessageReturn => {
+  try {
+    const spaceHash: string | null = sha3(message.space);
+    const timestampParsed: number =
+      typeof message.timestamp === "string"
+        ? parseInt(message.timestamp)
+        : message.timestamp;
+
+    if (!spaceHash) {
+      throw new Error("Hash of `space` returned empty.");
+    }
+
+    return {
+      spaceHash,
+      timestamp: timestampParsed,
+      payload: prepareDraftMessagePayload(message.payload),
+    };
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const prepareProposalPayload = (payload: Record<string, any>) => {
-  return Object.assign(payload, {
-    snapshot: payload.snapshot,
-    start: payload.start,
-    end: payload.end,
-  });
-};
+export function prepareDraftMessagePayload(
+  payload: PrepareDraftMessagePayloadData
+): PrepareDraftMessagePayloadReturn {
+  try {
+    const nameHash: string | null = sha3(payload.name);
+    const bodyHash: string | null = sha3(payload.body);
 
-export const prepareDraftMessage = (message: Record<string, any>) => {
-  return Object.assign(message, {
-    timestamp: message.timestamp,
-    payload: message.payload,
-  });
-};
+    if (!nameHash) {
+      throw new Error("Hash of `name` returned empty");
+    }
+    if (!bodyHash) {
+      throw new Error("Hash of `body` returned empty");
+    }
+
+    return {
+      nameHash,
+      bodyHash,
+      choices: payload.choices,
+    };
+  } catch (error) {
+    throw error;
+  }
+}
 
 export const toStepNode = (
   step: any,
@@ -449,7 +549,7 @@ export const signMessage = (provider: any, signer: any, data: any) => {
 };
 
 export const verifySignature = (
-  message: Record<string, any>,
+  message: MessageWithType,
   address: string,
   verifyingContract: string,
   actionId: string,

@@ -67,18 +67,6 @@ export type SnapshotCoreProposalData = {
    * Registered space name in the snapshot-hub api
    */
   space: string;
-  /**
-   * Intended contract address to use this data. For ERC712 signature verification.
-   */
-  actionId: string;
-  /**
-   * Ethereum network ID. For ERC712 signature verification.
-   */
-  chainId: number;
-  /**
-   * The contract address which will verify the signature. For ERC712 signature verification.
-   */
-  verifyingContract: string;
 };
 
 export type SnapshotDraftData = {
@@ -132,9 +120,6 @@ export type SnapshotMessageBase = {
   metadata: SnapshotCoreProposalPayloadData["metadata"];
   token: SnapshotCoreProposalData["token"];
   space: SnapshotCoreProposalData["space"];
-  actionId: SnapshotCoreProposalData["actionId"];
-  chainId: SnapshotCoreProposalData["chainId"];
-  verifyingContract: SnapshotCoreProposalData["verifyingContract"];
 };
 
 export type SnapshotMessageProposal = {
@@ -170,11 +155,9 @@ export type SnapshotMessageVote = {
 };
 
 export type SnapshotVoteProposal = {
-  actionId: SnapshotCoreProposalData["actionId"];
   proposalHash: SnapshotVoteData["payload"]["proposalHash"];
   space: SnapshotCoreProposalData["space"];
   token: SnapshotCoreProposalData["token"];
-  verifyingContract: SnapshotCoreProposalData["verifyingContract"];
 };
 
 export type SnapshotSubmitBaseReturn = {
@@ -313,3 +296,10 @@ export type SnapshotVoteResponse = Record<
  * @note Votes are inside an array, unlike the Proposals object.
  */
 export type SnapshotVotesResponse = SnapshotVoteResponse[];
+
+export type Erc712Data = {
+  actionId: string;
+  chainId: number;
+  verifyingContract: string;
+  message: Record<string, any>;
+};

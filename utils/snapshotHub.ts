@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import {
   CoreProposalVoteChoices,
   Erc712Data,
@@ -12,6 +13,7 @@ import {
   SnapshotVoteData,
   SnapshotVoteProposal,
   VoteChoices,
+  VoteChoicesIndex,
 } from "./types";
 
 /**
@@ -24,9 +26,15 @@ const VOTE_CHOICES: CoreProposalVoteChoices = [VoteChoices.Yes, VoteChoices.No];
 
 const getTimestampSeconds: () => number = () => Math.floor(Date.now() / 1e3);
 
-// @note The snapshot-hub API does not accept falsy choices like index `0`.
-const getVoteChoiceIndex = (choice: VoteChoices) =>
-  VOTE_CHOICES.findIndex((c) => c === choice) + 1;
+const getVoteChoiceIndex = (choice: VoteChoices): VoteChoicesIndex => {
+  const index = VoteChoicesIndex[choice];
+
+  if (!index) {
+    throw new Error("Could not find vote index.");
+  }
+
+  return index;
+};
 
 export const buildDraftMessage = async (
   message: SnapshotMessageBase,

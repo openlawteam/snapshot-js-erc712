@@ -39,7 +39,7 @@ import {
   PrepareVoteProposalData,
 } from "./types";
 import MerkleTree from "./utils/merkleTree";
-import { SnapshotType } from "./utils";
+import { SnapshotType, VoteChoicesIndex } from "./utils";
 
 export const getMessageERC712Hash = (
   message: MessageWithType,
@@ -409,7 +409,7 @@ export const createVote = (
   voteYes: boolean
 ) => {
   const payload = {
-    choice: voteYes ? 1 : 2,
+    choice: voteYes ? VoteChoicesIndex.Yes : VoteChoicesIndex.No,
     account,
     proposalHash,
   };

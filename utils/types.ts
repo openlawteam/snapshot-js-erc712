@@ -3,6 +3,12 @@ export enum VoteChoices {
   Yes = "Yes",
 }
 
+// @note The snapshot-hub API does not accept falsy choices like index `0`.
+export enum VoteChoicesIndex {
+  Yes = 1,
+  No = 2,
+}
+
 export enum SnapshotType {
   draft = "draft",
   proposal = "proposal",
@@ -91,7 +97,7 @@ export type SnapshotVoteData = {
     /**
      * The choice's index
      */
-    choice: number;
+    choice: VoteChoicesIndex;
     /**
      * The proposal's ERC712 hash
      */

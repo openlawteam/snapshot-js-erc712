@@ -1,4 +1,4 @@
-import { SnapshotType } from "./utils";
+import { SnapshotType, VoteChoicesIndex } from "./utils";
 
 export type PrepareVoteProposalData = {
   payload: {
@@ -47,7 +47,7 @@ export type PrepareVoteMessageData = {
 };
 
 export type PrepareVoteMessagePayloadData = {
-  choice: 1 | 2;
+  choice: VoteChoicesIndex;
   proposalHash: string;
 };
 

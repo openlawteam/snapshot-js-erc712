@@ -237,7 +237,7 @@ export type SnapshotProposalResponseData = {
   /**
    * Votes (`SnapshotVotesResponse`) are optionally included (i.e. requested via query param).
    */
-  votes?: SnapshotVoteResponse;
+  votes?: SnapshotVotesResponse;
   sig: string;
   authorIpfsHash: string;
   relayerIpfsHash: string;

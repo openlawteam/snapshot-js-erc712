@@ -81,3 +81,29 @@ export type PrepareProposalPayloadReturn = {
 export type MessageWithType = Record<string, any> & {
   type: SnapshotType | "result";
 };
+
+export type CreateVoteReturn = {
+  type: SnapshotType.vote;
+  timestamp: number;
+  payload: {
+    choice: VoteChoicesIndex;
+    account: string;
+    proposalHash: string;
+  };
+};
+
+export type VoteEntry = {
+  sig: string;
+  weight?: number;
+} & CreateVoteReturn;
+
+export type VoteEntryLeaf = {
+  account: string;
+  choice: VoteChoicesIndex;
+  index: number;
+  nbNo: number;
+  nbYes: number;
+  proposalHash: string;
+  sig: string;
+  weight: number;
+} & CreateVoteReturn;

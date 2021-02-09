@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import { sha3 } from "web3-utils";
+import { sha3, toBN } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
 
 import {
@@ -457,19 +457,13 @@ export const buildVoteLeafHashForMerkleTree = (
 
 export async function prepareVoteResult({
   actionId,
-  bankInstanceMethods,
   chainId,
   daoAddress,
-  sharesAddress,
-  snapshot,
   votes,
 }: {
   actionId: string;
-  bankInstanceMethods: Record<string, any>;
   chainId: number;
   daoAddress: string;
-  sharesAddress: string;
-  snapshot: number;
   votes: VoteEntry[];
 }): Promise<{ voteResultTree: MerkleTree; votes: VoteEntryLeaf[] }> {
   // Sort votes ASC by account string
@@ -486,35 +480,25 @@ export async function prepareVoteResult({
     return 0;
   });
 
-  const votesWithWeight = await Promise.all(
-    sortedVotes.map(async (vote) => {
-      /**
-       * Use provided `weight` (e.g. from subgraph) or use on-chain call.
-       */
-      const weight: number =
-        vote.weight ??
-        (await bankInstanceMethods.getPriorAmount(
-          vote.payload.account,
-          sharesAddress,
-          snapshot
-        ));
-      return { ...vote, weight };
-    })
-  );
-
-  const leaves = [...(votesWithWeight as VoteEntryLeaf[])];
+  const leaves = [...(sortedVotes as VoteEntryLeaf[])];
 
   leaves.forEach((leaf, idx) => {
-    leaf.nbYes = leaf.payload.choice === VoteChoicesIndex.Yes ? leaf.weight : 0;
-    leaf.nbNo = leaf.payload.choice !== VoteChoicesIndex.Yes ? leaf.weight : 0;
+    leaf.nbYes =
+      leaf.payload.choice === VoteChoicesIndex.Yes
+        ? toBN(leaf.weight).toString()
+        : "0";
+    leaf.nbNo =
+      leaf.payload.choice !== VoteChoicesIndex.Yes
+        ? toBN(leaf.weight).toString()
+        : "0";
     leaf.account = leaf.payload.account;
     leaf.choice = leaf.payload.choice;
     leaf.proposalHash = leaf.payload.proposalHash;
 
     if (idx > 0) {
       const previousLeaf = leaves[idx - 1];
-      leaf.nbYes = leaf.nbYes + previousLeaf.nbYes;
-      leaf.nbNo = leaf.nbNo + previousLeaf.nbNo;
+      leaf.nbYes = toBN(leaf.nbYes).add(toBN(previousLeaf.nbYes)).toString();
+      leaf.nbNo = toBN(leaf.nbNo).add(toBN(previousLeaf.nbNo)).toString();
     }
 
     leaf.index = idx;

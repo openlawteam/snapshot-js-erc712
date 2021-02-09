@@ -1,6 +1,6 @@
 {
   "name": "@openlaw/snapshot-js-erc712",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Implementation of ERC-712 structure signatures.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -94,16 +94,28 @@ export type CreateVoteReturn = {
 
 export type VoteEntry = {
   sig: string;
-  weight?: number;
+  /**
+   * Will be converted to BigNumber string
+   */
+  weight: string;
 } & CreateVoteReturn;
 
 export type VoteEntryLeaf = {
   account: string;
   choice: VoteChoicesIndex;
   index: number;
-  nbNo: number;
-  nbYes: number;
+  /**
+   * Will be converted to BigNumber string
+   */
+  nbNo: string;
+  /**
+   * Will be converted to BigNumber string
+   */
+  nbYes: string;
   proposalHash: string;
   sig: string;
-  weight: number;
+  /**
+   * Will be converted to BigNumber string
+   */
+  weight: string | number;
 } & CreateVoteReturn;

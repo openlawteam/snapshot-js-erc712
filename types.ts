@@ -81,3 +81,41 @@ export type PrepareProposalPayloadReturn = {
 export type MessageWithType = Record<string, any> & {
   type: SnapshotType | "result";
 };
+
+export type CreateVoteReturn = {
+  type: SnapshotType.vote;
+  timestamp: number;
+  payload: {
+    choice: VoteChoicesIndex;
+    account: string;
+    proposalHash: string;
+  };
+};
+
+export type VoteEntry = {
+  sig: string;
+  /**
+   * Will be converted to BigNumber string
+   */
+  weight: string;
+} & CreateVoteReturn;
+
+export type VoteEntryLeaf = {
+  account: string;
+  choice: VoteChoicesIndex;
+  index: number;
+  /**
+   * Will be converted to BigNumber string
+   */
+  nbNo: string;
+  /**
+   * Will be converted to BigNumber string
+   */
+  nbYes: string;
+  proposalHash: string;
+  sig: string;
+  /**
+   * Will be converted to BigNumber string
+   */
+  weight: string | number;
+} & CreateVoteReturn;

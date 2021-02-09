@@ -21,10 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
-import { sha3 } from "web3-utils";
+import { sha3, toBN } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
 
 import {
+  CreateVoteReturn,
   MessageWithType,
   PrepareDraftMessageData,
   PrepareDraftMessagePayloadData,
@@ -37,6 +38,8 @@ import {
   PrepareVoteMessageData,
   PrepareVoteMessagePayloadData,
   PrepareVoteProposalData,
+  VoteEntry,
+  VoteEntryLeaf,
 } from "./types";
 import MerkleTree from "./utils/merkleTree";
 import { SnapshotType, VoteChoicesIndex } from "./utils";
@@ -381,41 +384,51 @@ export function prepareDraftMessagePayload(
   }
 }
 
-export const toStepNode = (
-  step: any,
-  verifyingContract: string,
-  actionId: string,
-  chainId: number,
-  merkleTree: any
-) => {
-  return {
-    account: step.account,
-    nbNo: step.nbNo,
-    nbYes: step.nbYes,
-    index: step.index,
-    choice: step.choice,
-    sig: step.sig,
-    timestamp: step.timestamp,
-    proposalHash: step.proposalHash,
-    proof: merkleTree.getHexProof(
-      buildVoteLeafHashForMerkleTree(step, verifyingContract, actionId, chainId)
-    ),
-  };
-};
+export const toStepNode = ({
+  actionId,
+  chainId,
+  merkleTree,
+  step,
+  verifyingContract,
+}: {
+  actionId: string;
+  chainId: number;
+  merkleTree: MerkleTree;
+  step: VoteEntryLeaf;
+  verifyingContract: string;
+}) => ({
+  account: step.account,
+  nbNo: step.nbNo,
+  nbYes: step.nbYes,
+  index: step.index,
+  choice: step.choice,
+  sig: step.sig,
+  timestamp: step.timestamp,
+  proposalHash: step.proposalHash,
+  proof: merkleTree.getHexProof(
+    buildVoteLeafHashForMerkleTree(step, verifyingContract, actionId, chainId)
+  ),
+});
 
-export const createVote = (
-  proposalHash: string,
-  account: string,
-  voteYes: boolean
-) => {
+export const createVote = ({
+  account,
+  proposalHash,
+  timestamp,
+  voteYes,
+}: {
+  account: string;
+  proposalHash: string;
+  timestamp: number;
+  voteYes: boolean;
+}): CreateVoteReturn => {
   const payload = {
     choice: voteYes ? VoteChoicesIndex.Yes : VoteChoicesIndex.No,
     account,
     proposalHash,
   };
   const vote = {
-    type: "vote",
-    timestamp: Math.floor(new Date().getTime() / 1000),
+    type: SnapshotType.vote as SnapshotType.vote,
+    timestamp,
     payload,
   };
 
@@ -442,36 +455,50 @@ export const buildVoteLeafHashForMerkleTree = (
   return "0x" + TypedDataUtils.sign<any>(msgParams).toString("hex");
 };
 
-export const prepareVoteResult = async (
-  votes: any[],
-  dao: any,
-  actionId: string,
-  chainId: number,
-  snapshot: any,
-  shares: any
-) => {
-  const sortedVotes = votes.sort((a: any, b: any) => a.account - b.account);
-  const leaves = await Promise.all(
-    sortedVotes.map(async (vote) => {
-      const weight = await dao.getPriorAmount(
-        vote.payload.account,
-        shares,
-        snapshot
-      );
-      return Object.assign(vote, { weight });
-    })
-  );
+export async function prepareVoteResult({
+  actionId,
+  chainId,
+  daoAddress,
+  votes,
+}: {
+  actionId: string;
+  chainId: number;
+  daoAddress: string;
+  votes: VoteEntry[];
+}): Promise<{ voteResultTree: MerkleTree; votes: VoteEntryLeaf[] }> {
+  // Sort votes ASC by account string
+  const sortedVotes = votes.sort((a, b) => {
+    const accountA = a.payload.account.toUpperCase(); // ignore upper and lowercase
+    const accountB = b.payload.account.toUpperCase(); // ignore upper and lowercase
+    if (accountA < accountB) {
+      return -1;
+    }
+    if (accountA > accountB) {
+      return 1;
+    }
+    // names must be equal
+    return 0;
+  });
+
+  const leaves = [...(sortedVotes as VoteEntryLeaf[])];
 
   leaves.forEach((leaf, idx) => {
-    leaf.nbYes = leaf.voteResult === 1 ? 1 : 0;
-    leaf.nbNo = leaf.voteResult !== 1 ? 1 : 0;
+    leaf.nbYes =
+      leaf.payload.choice === VoteChoicesIndex.Yes
+        ? toBN(leaf.weight).toString()
+        : "0";
+    leaf.nbNo =
+      leaf.payload.choice !== VoteChoicesIndex.Yes
+        ? toBN(leaf.weight).toString()
+        : "0";
     leaf.account = leaf.payload.account;
     leaf.choice = leaf.payload.choice;
     leaf.proposalHash = leaf.payload.proposalHash;
+
     if (idx > 0) {
       const previousLeaf = leaves[idx - 1];
-      leaf.nbYes = leaf.nbYes + previousLeaf.nbYes;
-      leaf.nbNo = leaf.nbNo + previousLeaf.nbNo;
+      leaf.nbYes = toBN(leaf.nbYes).add(toBN(previousLeaf.nbYes)).toString();
+      leaf.nbNo = toBN(leaf.nbNo).add(toBN(previousLeaf.nbNo)).toString();
     }
 
     leaf.index = idx;
@@ -479,11 +506,12 @@ export const prepareVoteResult = async (
 
   const tree = new MerkleTree(
     leaves.map((vote) =>
-      buildVoteLeafHashForMerkleTree(vote, dao.address, actionId, chainId)
+      buildVoteLeafHashForMerkleTree(vote, daoAddress, actionId, chainId)
     )
   );
+
   return { voteResultTree: tree, votes: leaves };
-};
+}
 
 export function prepareVoteProposalData(
   data: PrepareVoteProposalData,

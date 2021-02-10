@@ -89,9 +89,6 @@ export type VoteEntry = {
     proposalHash: string;
   };
   sig: string;
-  /**
-   * Will be converted to BigNumber string
-   */
   timestamp: number;
   type: SnapshotType.vote;
   weight: string | number;
@@ -101,13 +98,7 @@ export type VoteEntryLeaf = {
   account: string;
   choice: VoteChoicesIndex;
   index: number;
-  /**
-   * Will be converted to BigNumber string
-   */
   nbNo: string;
-  /**
-   * Will be converted to BigNumber string
-   */
   nbYes: string;
   proposalHash: string;
 } & VoteEntry;

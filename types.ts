@@ -82,40 +82,23 @@ export type MessageWithType = Record<string, any> & {
   type: SnapshotType | "result";
 };
 
-export type CreateVoteReturn = {
-  type: SnapshotType.vote;
-  timestamp: number;
+export type VoteEntry = {
   payload: {
     choice: VoteChoicesIndex;
     account: string;
     proposalHash: string;
   };
-};
-
-export type VoteEntry = {
   sig: string;
-  /**
-   * Will be converted to BigNumber string
-   */
-  weight: string;
-} & CreateVoteReturn;
+  timestamp: number;
+  type: SnapshotType.vote;
+  weight: string | number;
+};
 
 export type VoteEntryLeaf = {
   account: string;
   choice: VoteChoicesIndex;
   index: number;
-  /**
-   * Will be converted to BigNumber string
-   */
   nbNo: string;
-  /**
-   * Will be converted to BigNumber string
-   */
   nbYes: string;
   proposalHash: string;
-  sig: string;
-  /**
-   * Will be converted to BigNumber string
-   */
-  weight: string | number;
-} & CreateVoteReturn;
+} & VoteEntry;

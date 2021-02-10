@@ -25,7 +25,6 @@ import { sha3, toBN } from "web3-utils";
 import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
 
 import {
-  CreateVoteReturn,
   MessageWithType,
   PrepareDraftMessageData,
   PrepareDraftMessagePayloadData,
@@ -413,23 +412,38 @@ export const toStepNode = ({
 export const createVote = ({
   account,
   proposalHash,
+  sig,
   timestamp,
   voteYes,
+  weight,
 }: {
   account: string;
   proposalHash: string;
   timestamp: number;
   voteYes: boolean;
-}): CreateVoteReturn => {
+  /**
+   * Optionally add existing weight. Defaults to `0`.
+   * @note Be sure to attach to the resulting `VoteEntry` before submission.
+   */
+  weight?: string | number;
+  /**
+   * Optionally add an existing signature. Defaults to `""`.
+   * @note Be sure to attach to the resulting `VoteEntry` before submission.
+   */
+  sig?: string;
+}): VoteEntry => {
   const payload = {
-    choice: voteYes ? VoteChoicesIndex.Yes : VoteChoicesIndex.No,
     account,
+    choice: voteYes ? VoteChoicesIndex.Yes : VoteChoicesIndex.No,
     proposalHash,
   };
+
   const vote = {
     type: SnapshotType.vote as SnapshotType.vote,
     timestamp,
     payload,
+    sig: sig ?? "",
+    weight: weight ?? 0,
   };
 
   return vote;
@@ -488,7 +502,7 @@ export async function prepareVoteResult({
         ? toBN(leaf.weight).toString()
         : "0";
     leaf.nbNo =
-      leaf.payload.choice !== VoteChoicesIndex.Yes
+      leaf.payload.choice === VoteChoicesIndex.No
         ? toBN(leaf.weight).toString()
         : "0";
     leaf.account = leaf.payload.account;

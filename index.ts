@@ -502,7 +502,7 @@ export async function prepareVoteResult({
         ? toBN(leaf.weight).toString()
         : "0";
     leaf.nbNo =
-      leaf.payload.choice !== VoteChoicesIndex.Yes
+      leaf.payload.choice === VoteChoicesIndex.No
         ? toBN(leaf.weight).toString()
         : "0";
     leaf.account = leaf.payload.account;

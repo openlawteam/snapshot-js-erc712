@@ -22,7 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 import { sha3, toBN } from "web3-utils";
-import { TypedDataUtils, recoverTypedSignature_v4 } from "eth-sig-util";
+import {
+  TypedDataUtils,
+  recoverTypedSignature_v4,
+  signTypedData_v4,
+} from "eth-sig-util";
 
 import {
   MessageWithType,
@@ -101,6 +105,8 @@ export const getDomainDefinition = (
         actionId,
         chainId
       );
+    case "coupon":
+      return getCouponDomainDefinition(verifyingContract, actionId, chainId);
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -233,6 +239,25 @@ export const getVoteResultRootDomainDefinition = (
   return { domain, types };
 };
 
+export const getCouponDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [
+      { name: "authorizedMember", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+    ],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -259,6 +284,8 @@ export const prepareMessage = (message: MessageWithType) => {
         (message as unknown) as PrepareProposalMessageData
       );
     case "result":
+      return message;
+    case "coupon":
       return message;
     default:
       throw new Error("unknown type " + message.type);
@@ -617,6 +644,34 @@ export const verifySignature = (
     sig: signature,
   });
   return address.toLowerCase() === recoverAddress.toLowerCase();
+};
+
+export const SigUtilSigner = (privateKeyStr: string) => {
+  return function (
+    message: MessageWithType,
+    verifyingContract: string,
+    actionId: string,
+    chainId: number
+  ) {
+    const m = prepareMessage(message);
+    if (privateKeyStr.indexOf("0x") === 0) {
+      privateKeyStr = privateKeyStr.slice(2);
+    }
+    const privateKey = Buffer.from(privateKeyStr, "hex");
+    const { domain, types } = getDomainDefinition(
+      message,
+      verifyingContract,
+      actionId,
+      chainId
+    );
+    const msgParams = {
+      domain,
+      message: m,
+      primaryType: "Message",
+      types,
+    };
+    return signTypedData_v4<any>(privateKey, { data: msgParams });
+  };
 };
 
 // Export utilities

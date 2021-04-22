@@ -79,7 +79,7 @@ export type PrepareProposalPayloadReturn = {
 };
 
 export type MessageWithType = Record<string, any> & {
-  type: SnapshotType | "result";
+  type: SnapshotType | "result" | "coupon";
 };
 
 export type VoteEntry = {

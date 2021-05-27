@@ -101,7 +101,7 @@ export type SnapshotVoteData = {
     /**
      * The proposal's ERC712 hash
      */
-    proposalHash: string;
+    proposalId: string;
     /**
      * Stringifiable metadata for the vote.
      */
@@ -161,7 +161,7 @@ export type SnapshotMessageVote = {
 };
 
 export type SnapshotVoteProposal = {
-  proposalHash: SnapshotVoteData["payload"]["proposalHash"];
+  proposalId: SnapshotVoteData["payload"]["proposalId"];
   space: SnapshotCoreProposalData["space"];
   token: SnapshotCoreProposalData["token"];
 };
@@ -272,7 +272,7 @@ export type SnapshotVoteResponseData = {
        * Index of the vote chosen, i.e 1 = Yes, 2 = No
        */
       choice: number;
-      proposalHash: string;
+      proposalId: string;
       metadata: {
         /**
          * @see SnapshotVoteData

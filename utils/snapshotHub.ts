@@ -107,7 +107,7 @@ export const buildVoteMessage = async (
     return {
       payload: {
         choice: getVoteChoiceIndex(vote.choice),
-        proposalHash: proposal.proposalHash,
+        proposalId: proposal.proposalId,
         metadata: vote.metadata,
       },
       space: proposal.space,

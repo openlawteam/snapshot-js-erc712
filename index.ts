@@ -41,6 +41,7 @@ import {
   PrepareVoteMessageData,
   PrepareVoteMessagePayloadData,
   PrepareVoteProposalData,
+  ToStepNodeResult,
   VoteEntry,
   VoteEntryLeaf,
 } from "./types";
@@ -136,12 +137,12 @@ export const getVoteDomainDefinition = (
   // The named list of all type definitions
   const types = {
     Message: [
-      { name: "timestamp", type: "uint256" },
+      { name: "timestamp", type: "uint64" },
       { name: "payload", type: "MessagePayload" },
     ],
     MessagePayload: [
-      { name: "choice", type: "uint256" },
-      { name: "proposalHash", type: "bytes32" },
+      { name: "choice", type: "uint32" },
+      { name: "proposalId", type: "bytes32" },
     ],
     EIP712Domain: getDomainType(),
   };
@@ -159,13 +160,12 @@ export const getVoteStepDomainDefinition = (
   // The named list of all type definitions
   const types = {
     Message: [
-      { name: "account", type: "address" },
-      { name: "timestamp", type: "uint256" },
-      { name: "nbYes", type: "uint256" },
-      { name: "nbNo", type: "uint256" },
-      { name: "index", type: "uint256" },
-      { name: "choice", type: "uint256" },
-      { name: "proposalHash", type: "bytes32" },
+      { name: "timestamp", type: "uint64" },
+      { name: "nbYes", type: "uint88" },
+      { name: "nbNo", type: "uint88" },
+      { name: "index", type: "uint32" },
+      { name: "choice", type: "uint32" },
+      { name: "proposalId", type: "bytes32" },
     ],
     EIP712Domain: getDomainType(),
   };
@@ -182,7 +182,7 @@ export const getProposalDomainDefinition = (
 
   const types = {
     Message: [
-      { name: "timestamp", type: "uint256" },
+      { name: "timestamp", type: "uint64" },
       { name: "spaceHash", type: "bytes32" },
       { name: "payload", type: "MessagePayload" },
     ],
@@ -190,8 +190,8 @@ export const getProposalDomainDefinition = (
       { name: "nameHash", type: "bytes32" },
       { name: "bodyHash", type: "bytes32" },
       { name: "choices", type: "string[]" },
-      { name: "start", type: "uint256" },
-      { name: "end", type: "uint256" },
+      { name: "start", type: "uint64" },
+      { name: "end", type: "uint64" },
       { name: "snapshot", type: "string" },
     ],
     EIP712Domain: getDomainType(),
@@ -209,7 +209,7 @@ export const getDraftDomainDefinition = (
 
   const types = {
     Message: [
-      { name: "timestamp", type: "uint256" },
+      { name: "timestamp", type: "uint64" },
       { name: "spaceHash", type: "bytes32" },
       { name: "payload", type: "MessagePayload" },
     ],
@@ -272,16 +272,14 @@ export const prepareMessage = (message: MessageWithType) => {
   switch (message.type) {
     // @note Probably better to use this function on its own in consuming code, as the types are precise.
     case "draft":
-      return prepareDraftMessage(
-        (message as unknown) as PrepareDraftMessageData
-      );
+      return prepareDraftMessage(message as unknown as PrepareDraftMessageData);
     // @note Probably better to use this function on its own in consuming code, as the types are precise.
     case "vote":
-      return prepareVoteMessage((message as unknown) as PrepareVoteMessageData);
+      return prepareVoteMessage(message as unknown as PrepareVoteMessageData);
     case "proposal":
       // @note Probably better to use this function on its own in consuming code, as the types are precise.
       return prepareProposalMessage(
-        (message as unknown) as PrepareProposalMessageData
+        message as unknown as PrepareProposalMessageData
       );
     case "result":
       return message;
@@ -304,12 +302,10 @@ export const prepareVoteMessage = (message: PrepareVoteMessageData) => {
   };
 };
 
-export const prepareVotePayload = (payload: PrepareVoteMessagePayloadData) => {
-  return {
-    proposalHash: payload.proposalHash,
-    choice: payload.choice,
-  };
-};
+export const prepareVotePayload = (payload: PrepareVoteMessagePayloadData) => ({
+  proposalId: payload.proposalId,
+  choice: payload.choice,
+});
 
 export function prepareProposalMessage(
   message: PrepareProposalMessageData
@@ -422,58 +418,57 @@ export const toStepNode = ({
   merkleTree: MerkleTree;
   step: VoteEntryLeaf;
   verifyingContract: string;
-}) => ({
-  account: step.account,
+}): ToStepNodeResult => ({
+  choice: step.choice,
+  index: step.index,
+  member: step.member,
   nbNo: step.nbNo,
   nbYes: step.nbYes,
-  index: step.index,
-  choice: step.choice,
-  sig: step.sig,
-  timestamp: step.timestamp,
-  proposalHash: step.proposalHash,
   proof: merkleTree.getHexProof(
     buildVoteLeafHashForMerkleTree(step, verifyingContract, actionId, chainId)
   ),
+  proposalId: step.proposalId,
+  sig: step.sig,
+  timestamp: step.timestamp,
 });
 
 export const createVote = ({
-  account,
-  proposalHash,
-  sig,
+  memberAddress,
+  proposalId,
+  sig = "0x",
   timestamp,
   voteYes,
-  weight,
+  weight = "0",
 }: {
-  account: string;
-  proposalHash: string;
+  memberAddress: string;
+  proposalId: string;
+  /**
+   * Will default to `"0x"` if not provided.
+   */
+  sig: string;
   timestamp: number;
   voteYes: boolean;
   /**
-   * Optionally add existing weight. Defaults to `0`.
-   * @note Be sure to attach to the resulting `VoteEntry` before submission.
+   * Will default to `0` if not provided.
    */
-  weight?: string | number;
-  /**
-   * Optionally add an existing signature. Defaults to `""`.
-   * @note Be sure to attach to the resulting `VoteEntry` before submission.
-   */
-  sig?: string;
+  weight: string;
 }): VoteEntry => {
-  const payload = {
-    account,
-    choice: voteYes ? VoteChoicesIndex.Yes : VoteChoicesIndex.No,
-    proposalHash,
-  };
+  // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
+  const choice: VoteEntry["choice"] = !weight
+    ? 0
+    : voteYes
+    ? VoteChoicesIndex.Yes
+    : VoteChoicesIndex.No;
 
-  const vote = {
-    type: SnapshotType.vote as SnapshotType.vote,
+  return {
+    choice,
+    member: memberAddress,
+    proposalId,
+    sig: sig ?? "0x",
     timestamp,
-    payload,
-    sig: sig ?? "",
-    weight: weight ?? 0,
+    type: SnapshotType.vote as SnapshotType.vote,
+    weight: weight ?? "0",
   };
-
-  return vote;
 };
 
 export const buildVoteLeafHashForMerkleTree = (
@@ -506,52 +501,44 @@ export async function prepareVoteResult({
   chainId: number;
   daoAddress: string;
   votes: VoteEntry[];
-}): Promise<{ voteResultTree: MerkleTree; votes: VoteEntryLeaf[] }> {
-  // Sort votes ASC by account string
-  const sortedVotes = votes.sort((a, b) => {
-    const accountA = a.payload.account.toUpperCase(); // ignore upper and lowercase
-    const accountB = b.payload.account.toUpperCase(); // ignore upper and lowercase
-    if (accountA < accountB) {
-      return -1;
-    }
-    if (accountA > accountB) {
-      return 1;
-    }
-    // names must be equal
-    return 0;
-  });
+}): Promise<{ voteResultTree: MerkleTree; result: ToStepNodeResult[] }> {
+  const votesToLeaves = [...(votes as VoteEntryLeaf[])];
 
-  const leaves = [...(sortedVotes as VoteEntryLeaf[])];
+  // Build each vote leaf
+  votesToLeaves.forEach((v, i) => {
+    const { choice, weight } = v;
 
-  leaves.forEach((leaf, idx) => {
-    leaf.nbYes =
-      leaf.payload.choice === VoteChoicesIndex.Yes
-        ? toBN(leaf.weight).toString()
-        : "0";
-    leaf.nbNo =
-      leaf.payload.choice === VoteChoicesIndex.No
-        ? toBN(leaf.weight).toString()
-        : "0";
-    leaf.account = leaf.payload.account;
-    leaf.choice = leaf.payload.choice;
-    leaf.proposalHash = leaf.payload.proposalHash;
+    v.nbNo = choice === VoteChoicesIndex.No ? weight : "0";
+    v.nbYes = choice === VoteChoicesIndex.Yes ? weight : "0";
 
-    if (idx > 0) {
-      const previousLeaf = leaves[idx - 1];
-      leaf.nbYes = toBN(leaf.nbYes).add(toBN(previousLeaf.nbYes)).toString();
-      leaf.nbNo = toBN(leaf.nbNo).add(toBN(previousLeaf.nbNo)).toString();
+    // Add together the running total of `nbYes`, `nbNo` voting `weight`s
+    if (i > 0) {
+      const previousVoteLeaf = votesToLeaves[i - 1];
+
+      v.nbYes = toBN(v.nbYes).add(toBN(previousVoteLeaf.nbYes)).toString();
+      v.nbNo = toBN(v.nbNo).add(toBN(previousVoteLeaf.nbNo)).toString();
     }
 
-    leaf.index = idx;
+    v.index = i;
   });
 
   const tree = new MerkleTree(
-    leaves.map((vote) =>
-      buildVoteLeafHashForMerkleTree(vote, daoAddress, actionId, chainId)
+    votesToLeaves.map((v) =>
+      buildVoteLeafHashForMerkleTree(v, daoAddress, actionId, chainId)
     )
   );
 
-  return { voteResultTree: tree, votes: leaves };
+  const result = votesToLeaves.map((vote) =>
+    toStepNode({
+      actionId,
+      chainId,
+      merkleTree: tree,
+      step: vote,
+      verifyingContract: daoAddress,
+    })
+  );
+
+  return { voteResultTree: tree, result };
 }
 
 export function prepareVoteProposalData(
@@ -561,14 +548,14 @@ export function prepareVoteProposalData(
   return web3Instance.eth.abi.encodeParameter(
     {
       ProposalMessage: {
-        timestamp: "uint256",
+        timestamp: "uint64",
         spaceHash: "bytes32",
         payload: {
           nameHash: "bytes32",
           bodyHash: "bytes32",
           choices: "string[]",
-          start: "uint256",
-          end: "uint256",
+          start: "uint64",
+          end: "uint64",
           snapshot: "string",
         },
         sig: "bytes",

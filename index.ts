@@ -436,7 +436,7 @@ export const createVote = ({
   memberAddress,
   proposalId,
   sig = "0x",
-  timestamp,
+  timestamp = 0,
   voteYes,
   weight = "0",
 }: {

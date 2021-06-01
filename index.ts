@@ -460,13 +460,15 @@ export const createVote = ({
    */
   weight: string;
 }): VoteEntry => {
+  const noWeight: boolean =
+    isNaN(Number(weight)) || Number(weight) === 0 || !weight;
+
   // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
-  const choice: VoteEntry["choice"] =
-    Number(weight) === 0 || !weight
-      ? 0
-      : voteYes
-      ? VoteChoicesIndex.Yes
-      : VoteChoicesIndex.No;
+  const choice: VoteEntry["choice"] = noWeight
+    ? 0
+    : voteYes
+    ? VoteChoicesIndex.Yes
+    : VoteChoicesIndex.No;
 
   return {
     choice,
@@ -476,7 +478,7 @@ export const createVote = ({
     timestamp,
     type: SnapshotType.vote as SnapshotType.vote,
     // Check if the weight string is a `Number`
-    weight: isNaN(Number(weight)) ? "0" : weight,
+    weight: noWeight ? "0" : weight,
   };
 };
 

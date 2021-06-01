@@ -510,23 +510,25 @@ export const createVote = ({
 };
 
 export const buildVoteLeafHashForMerkleTree = (
-  leaf: any,
+  leaf: VoteEntryLeaf,
   verifyingContract: string,
   actionId: string,
   chainId: number
-) => {
+): string => {
   const { domain, types } = getVoteStepDomainDefinition(
     verifyingContract,
     actionId,
     chainId
   );
-  const msgParams = {
+
+  const signature = TypedDataUtils.sign<any>({
     domain,
     message: leaf,
     primaryType: "Message",
     types,
-  };
-  return "0x" + TypedDataUtils.sign<any>(msgParams).toString("hex");
+  }).toString("hex");
+
+  return `0x${signature}`;
 };
 
 export async function prepareVoteResult({

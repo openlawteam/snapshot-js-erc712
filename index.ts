@@ -432,13 +432,20 @@ export const toStepNode = ({
   timestamp: step.timestamp,
 });
 
+/**
+ * createVote
+ *
+ * A helper function which shapes individual off-chain voting data for `prepareVoteResult`.
+ *
+ * @returns `VoteEntry`
+ */
 export const createVote = ({
   memberAddress,
   proposalId,
-  sig = "0x",
-  timestamp = 0,
+  sig,
+  timestamp,
   voteYes,
-  weight = "0",
+  weight,
 }: {
   memberAddress: string;
   proposalId: string;
@@ -468,7 +475,8 @@ export const createVote = ({
     sig: sig ?? "0x",
     timestamp,
     type: SnapshotType.vote as SnapshotType.vote,
-    weight: weight ?? "0",
+    // Check if the weight string is a `Number`
+    weight: isNaN(Number(weight)) ? "0" : weight,
   };
 };
 

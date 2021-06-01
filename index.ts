@@ -454,11 +454,12 @@ export const createVote = ({
   weight: string;
 }): VoteEntry => {
   // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
-  const choice: VoteEntry["choice"] = !weight
-    ? 0
-    : voteYes
-    ? VoteChoicesIndex.Yes
-    : VoteChoicesIndex.No;
+  const choice: VoteEntry["choice"] =
+    Number(weight) === 0 || !weight
+      ? 0
+      : voteYes
+      ? VoteChoicesIndex.Yes
+      : VoteChoicesIndex.No;
 
   return {
     choice,

@@ -437,6 +437,11 @@ export const toStepNode = ({
  *
  * A helper function which shapes individual off-chain voting data for `prepareVoteResult`.
  *
+ * If a member did not vote (weight === "0"):
+ *
+ * - Set `timestamp: 0`
+ * - Set `sig: "0x"`, or "" (defaults to "0x")
+ *
  * @returns `VoteEntry`
  */
 export const createVote = ({
@@ -451,8 +456,13 @@ export const createVote = ({
   proposalId: string;
   /**
    * Will default to `"0x"` if not provided.
+   * If the member did not vote set to `"0x"`.
    */
   sig: string;
+  /**
+   * Seconds rounded, e.g. Math.floor(timestampSeconds).
+   * If the member did not vote, set to `0`.
+   */
   timestamp: number;
   voteYes: boolean;
   /**
@@ -460,8 +470,15 @@ export const createVote = ({
    */
   weight: string;
 }): VoteEntry => {
-  const noWeight: boolean =
-    isNaN(Number(weight)) || Number(weight) === 0 || !weight;
+  if (isNaN(timestamp)) {
+    throw new Error("`timestamp` must not be `NaN`.");
+  }
+
+  if (isNaN(Number(weight))) {
+    throw new Error("`weight` must not be `NaN`.");
+  }
+
+  const noWeight: boolean = Number(weight) === 0 || !weight;
 
   // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
   const choice: VoteEntry["choice"] = noWeight
@@ -474,11 +491,13 @@ export const createVote = ({
     choice,
     member: memberAddress,
     proposalId,
-    sig: sig ?? "0x",
-    timestamp,
+    // Default to `"0x"` if string is falsy.
+    sig: sig || "0x",
+    // Only allow positive Number
+    timestamp: Math.abs(timestamp),
     type: SnapshotType.vote as SnapshotType.vote,
     // Check if the weight string is a `Number`
-    weight: noWeight ? "0" : weight,
+    weight: noWeight ? "0" : weight.toString(),
   };
 };
 

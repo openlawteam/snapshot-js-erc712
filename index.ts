@@ -307,6 +307,14 @@ export const prepareVotePayload = (payload: PrepareVoteMessagePayloadData) => ({
   choice: payload.choice,
 });
 
+/**
+ * prepareProposalMessage
+ *
+ * @todo isNaN check and throw for `timestamp`, `start`, `end`
+ *
+ * @param message `PrepareProposalMessageData`
+ * @returns `PrepareProposalMessageReturn`
+ */
 export function prepareProposalMessage(
   message: PrepareProposalMessageData
 ): PrepareProposalMessageReturn {

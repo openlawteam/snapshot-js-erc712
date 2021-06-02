@@ -11,7 +11,6 @@ describe("createVote unit tests", () => {
     // Vote "yes"
     expect(
       createVote({
-        memberAddress: DEFAULT_ETH_ADDRESS,
         proposalId: DEFAULT_PROPOSAL_ID,
         sig: DEFAULT_SIG,
         timestamp: DEFAULT_TIMESTAMP,
@@ -20,7 +19,6 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       choice: 1,
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
@@ -31,7 +29,6 @@ describe("createVote unit tests", () => {
     // Vote "no"
     expect(
       createVote({
-        memberAddress: DEFAULT_ETH_ADDRESS,
         proposalId: DEFAULT_PROPOSAL_ID,
         sig: DEFAULT_SIG,
         timestamp: DEFAULT_TIMESTAMP,
@@ -40,7 +37,6 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       choice: 2,
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
@@ -51,7 +47,6 @@ describe("createVote unit tests", () => {
     // Member did not vote
     expect(
       createVote({
-        memberAddress: DEFAULT_ETH_ADDRESS,
         proposalId: DEFAULT_PROPOSAL_ID,
         sig: DEFAULT_SIG,
         timestamp: DEFAULT_TIMESTAMP,
@@ -60,7 +55,6 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       choice: 0,
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
@@ -71,7 +65,6 @@ describe("createVote unit tests", () => {
     // Somehow a member voted with `weight: "0"`
     expect(
       createVote({
-        memberAddress: DEFAULT_ETH_ADDRESS,
         proposalId: DEFAULT_PROPOSAL_ID,
         sig: "0x",
         timestamp: 0,
@@ -80,7 +73,6 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       choice: 0,
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: "0x",
       timestamp: 0,
@@ -99,7 +91,6 @@ describe("createVote unit tests", () => {
     };
 
     const defaultReturnData = {
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: "0x",
       timestamp: 0,
@@ -178,7 +169,6 @@ describe("createVote unit tests", () => {
     };
 
     const defaultReturnData = {
-      member: DEFAULT_ETH_ADDRESS,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,

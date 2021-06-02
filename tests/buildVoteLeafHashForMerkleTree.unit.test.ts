@@ -21,7 +21,6 @@ describe("buildVoteLeafHashForMerkleTree unit tests", () => {
           nbNo: "100000",
           nbYes: "200000",
           choice: VoteChoicesIndex.Yes,
-          member: DEFAULT_ETH_ADDRESS,
           proposalId: DEFAULT_PROPOSAL_ID,
           sig: DEFAULT_SIG,
           // We don't use our `DEFAULT_TIMESTAMP` test helper as we need this to be deterministic.

@@ -84,7 +84,6 @@ export type MessageWithType = Record<string, any> & {
 
 export type VoteEntry = {
   choice: VoteChoicesIndex | 0;
-  member: string;
   proposalId: string;
   sig: string;
   timestamp: number;
@@ -101,7 +100,6 @@ export type VoteEntryLeaf = {
 export type ToStepNodeResult = {
   choice: VoteChoicesIndex | 0;
   index: number;
-  member: string;
   nbNo: string;
   nbYes: string;
   proof: string[];

@@ -429,7 +429,6 @@ export const toStepNode = ({
 }): ToStepNodeResult => ({
   choice: step.choice,
   index: step.index,
-  member: step.member,
   nbNo: step.nbNo,
   nbYes: step.nbYes,
   proof: merkleTree.getHexProof(
@@ -453,14 +452,12 @@ export const toStepNode = ({
  * @returns `VoteEntry`
  */
 export const createVote = ({
-  memberAddress,
   proposalId,
   sig,
   timestamp,
   voteYes,
   weight,
 }: {
-  memberAddress: string;
   proposalId: string;
   /**
    * Will default to `"0x"` if not provided.
@@ -497,7 +494,6 @@ export const createVote = ({
 
   return {
     choice,
-    member: memberAddress,
     proposalId,
     // Default to `"0x"` if string is falsy.
     sig: sig || "0x",

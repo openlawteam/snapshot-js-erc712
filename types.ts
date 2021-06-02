@@ -48,7 +48,7 @@ export type PrepareVoteMessageData = {
 
 export type PrepareVoteMessagePayloadData = {
   choice: VoteChoicesIndex;
-  proposalHash: string;
+  proposalId: string;
 };
 
 export type PrepareDraftMessageReturn = {
@@ -83,22 +83,27 @@ export type MessageWithType = Record<string, any> & {
 };
 
 export type VoteEntry = {
-  payload: {
-    choice: VoteChoicesIndex;
-    account: string;
-    proposalHash: string;
-  };
+  choice: VoteChoicesIndex | 0;
+  proposalId: string;
   sig: string;
   timestamp: number;
   type: SnapshotType.vote;
-  weight: string | number;
+  weight: string;
 };
 
 export type VoteEntryLeaf = {
-  account: string;
-  choice: VoteChoicesIndex;
   index: number;
   nbNo: string;
   nbYes: string;
-  proposalHash: string;
 } & VoteEntry;
+
+export type ToStepNodeResult = {
+  choice: VoteChoicesIndex | 0;
+  index: number;
+  nbNo: string;
+  nbYes: string;
+  proof: string[];
+  proposalId: string;
+  sig: string;
+  timestamp: number;
+};

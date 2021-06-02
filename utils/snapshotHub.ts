@@ -107,7 +107,7 @@ export const buildVoteMessage = async (
     return {
       payload: {
         choice: getVoteChoiceIndex(vote.choice),
-        proposalHash: proposal.proposalHash,
+        proposalId: proposal.proposalId,
         metadata: vote.metadata,
       },
       space: proposal.space,
@@ -117,7 +117,8 @@ export const buildVoteMessage = async (
       version: data.version,
     };
   } catch (error) {
-    throw error;
+    // Error is an Axios error, so we should just re-create our own simple Error
+    throw new Error(error.message);
   }
 };
 

@@ -117,7 +117,8 @@ export const buildVoteMessage = async (
       version: data.version,
     };
   } catch (error) {
-    throw error;
+    // Error is an Axios error, so we should just re-create our own simple Error
+    throw new Error(error.message);
   }
 };
 

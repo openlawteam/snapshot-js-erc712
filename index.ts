@@ -487,8 +487,8 @@ export const createVote = ({
   const sigTrimmed: string = sig.trim();
   const noSig: boolean = !sigTrimmed || sigTrimmed === "0x";
   const noWeight: boolean = Number(weight) <= 0 || !weight || noSig;
-  // If no vote, set to `0`. Only allow positive Number.
-  const timestampToUse: number = noSig || noWeight ? 0 : Math.abs(timestamp);
+  // If no `sig`, set to `0`. Only allow positive Number.
+  const timestampToUse: number = noSig ? 0 : Math.abs(timestamp);
 
   // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
   const choice: VoteEntry["choice"] = noWeight

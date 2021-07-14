@@ -121,7 +121,7 @@ describe("createVote unit tests", () => {
         weight: "0",
       })
     ).toEqual({
-      choice: 0,
+      choice: 2,
       proposalId: DEFAULT_PROPOSAL_ID,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
@@ -314,7 +314,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
-      choice: 0,
+      choice: 1,
       weight: "0",
     });
 
@@ -326,7 +326,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
-      choice: 0,
+      choice: 1,
       weight: "0",
     });
 
@@ -338,7 +338,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
-      choice: 0,
+      choice: 1,
       weight: "0",
     });
 
@@ -350,7 +350,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
-      choice: 0,
+      choice: 1,
       weight: "0",
     });
   });
@@ -416,6 +416,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
+      choice: 1,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
     });
@@ -425,10 +426,11 @@ describe("createVote unit tests", () => {
       createVote({
         ...defaultArgs,
         sig: DEFAULT_SIG,
-        weight: "0",
+        weight: "-100000",
       })
     ).toEqual({
       ...defaultReturnData,
+      choice: 1,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
     });
@@ -442,6 +444,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
+      choice: 1,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
     });
@@ -455,6 +458,7 @@ describe("createVote unit tests", () => {
       })
     ).toEqual({
       ...defaultReturnData,
+      choice: 1,
       sig: DEFAULT_SIG,
       timestamp: DEFAULT_TIMESTAMP,
     });

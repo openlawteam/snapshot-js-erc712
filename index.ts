@@ -490,8 +490,11 @@ export const createVote = ({
   // If no `sig`, set to `0`. Only allow positive Number.
   const timestampToUse: number = noSig ? 0 : Math.abs(timestamp);
 
-  // If `weight` is falsey then set choice to `0`, else continue to determine a choice of yes or no.
-  const choice: VoteEntry["choice"] = noWeight
+  /**
+   * If `sig` is falsey then set choice to `0` (a vote never occurred),
+   * else continue to determine a choice of yes or no.
+   */
+  const choice: VoteEntry["choice"] = noSig
     ? 0
     : voteYes
     ? VoteChoicesIndex.Yes

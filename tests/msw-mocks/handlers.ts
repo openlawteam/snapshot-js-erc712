@@ -1,6 +1,18 @@
 import { rest } from "msw";
+import { SNAPSHOT_HUB_API_URL } from "../msw-mocks/config";
+import {
+  snapshotAPIDraftResponse,
+  snapshotAPIOffchainProofResponse,
+  snapshotAPIProposalResponse,
+  snapshotAPIRootResponse,
+  snapshotAPISpaceResponse,
+  snapshotAPISubmitMessage,
+} from "./rest-responses/snapshot-api";
 
-const snapshotAPIStatusHandler = rest.get("*/api", (_req, res, ctx) =>
+/**
+ * Snapshot API
+ */
+const getSnapshotAPIStatus = rest.get("*/api", (_req, res, ctx) =>
   res(
     ctx.json({
       data: {
@@ -14,5 +26,54 @@ const snapshotAPIStatusHandler = rest.get("*/api", (_req, res, ctx) =>
   )
 );
 
-// Export all mock handlers
-export const handlers = [snapshotAPIStatusHandler];
+const getSnapshotAPIRoot = rest.get(
+  `${SNAPSHOT_HUB_API_URL}/api`,
+  async (_req, res, ctx) => res(ctx.json(snapshotAPIRootResponse))
+);
+
+const getSnapshotAPISpace = rest.get(
+  `${SNAPSHOT_HUB_API_URL}/api/spaces/:spaceName`,
+  async (_req, res, ctx) => res(ctx.json(snapshotAPISpaceResponse))
+);
+
+const getSnapshotAPIDraft = rest.get(
+  `${SNAPSHOT_HUB_API_URL}/api/:spaceName/draft/:id`,
+  async (_req, res, ctx) => res(ctx.json(snapshotAPIDraftResponse))
+);
+
+const getSnapshotAPIProposal = rest.get(
+  `${SNAPSHOT_HUB_API_URL}/api/:spaceName/proposal/:id`,
+  async (_req, res, ctx) => res(ctx.json(snapshotAPIProposalResponse))
+);
+
+const postSnapshotAPIMessage = rest.post(
+  `${SNAPSHOT_HUB_API_URL}/api/message`,
+  async (_req, res, ctx) => res(ctx.json(snapshotAPISubmitMessage))
+);
+
+const postSnapshotAPIOffchainProof = rest.post(
+  `${SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
+  (_req, res, ctx) => res(ctx.status(201))
+);
+
+const getSnapshotAPIOffchainProof = rest.get(
+  `${SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proof/:merkleRoot`,
+  (_req, res, ctx) => res(ctx.json(snapshotAPIOffchainProofResponse))
+);
+
+/**
+ * HANDLERS TO EXPORT
+ */
+
+const handlers = [
+  getSnapshotAPIDraft,
+  getSnapshotAPIOffchainProof,
+  getSnapshotAPIProposal,
+  getSnapshotAPIRoot,
+  getSnapshotAPIStatus,
+  getSnapshotAPISpace,
+  postSnapshotAPIMessage,
+  postSnapshotAPIOffchainProof,
+];
+
+export { handlers };

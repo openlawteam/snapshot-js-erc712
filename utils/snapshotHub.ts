@@ -185,25 +185,22 @@ export async function submitOffchainVotingProof(
   space: string,
   data: SubmitOffchainVotingProofArguments
 ): Promise<void> {
-  try {
-    const response = await axios.post(
-      `${snapshotHubURL}/api/${space}/offchain_proofs`,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  return axios
+    .post(`${snapshotHubURL}/api/${space}/offchain_proofs`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((resp) => resp.data)
+    .catch((err) => {
+      const resp = err.response;
 
-    if (response.status !== 201) {
-      throw new Error(
-        "Something went wrong while submitting the off-chain vote proof."
-      );
-    }
-  } catch (error) {
-    throw error;
-  }
+      if (resp.status !== 201) {
+        throw new Error(
+          "Something went wrong while submitting the off-chain vote proof."
+        );
+      }
+    });
 }
 
 /**
@@ -219,25 +216,23 @@ export async function getOffchainVotingProof(
   space: string,
   merkleRootHex: string
 ): Promise<SnapshotOffchainProofResponse | undefined> {
-  try {
-    const response = await axios.get(
-      `${snapshotHubURL}/api/${space}/offchain_proof/${merkleRootHex}`
-    );
+  return axios
+    .get(`${snapshotHubURL}/api/${space}/offchain_proof/${merkleRootHex}`)
+    .then((resp) => resp.data)
+    .catch((err) => {
+      const resp = err.response;
+      // Return empty if not found
+      if (resp.status === 404) {
+        return undefined;
+      }
 
-    // Return empty if not found
-    if (response.status === 404) {
-      return undefined;
-    }
+      // Some other error occurred
+      if (resp.status !== 200) {
+        throw new Error(
+          "Something went wrong while getting the off-chain vote proof."
+        );
+      }
 
-    // Some other error occurred
-    if (response.status !== 200) {
-      throw new Error(
-        "Something went wrong while getting the off-chain vote proof."
-      );
-    }
-
-    return await response.data;
-  } catch (error) {
-    throw error;
-  }
+      throw err;
+    });
 }

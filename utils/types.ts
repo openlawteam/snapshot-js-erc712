@@ -1,3 +1,5 @@
+import { ToStepNodeResult } from "../types";
+
 export enum VoteChoices {
   No = "No",
   Yes = "Yes",
@@ -308,4 +310,36 @@ export type Erc712Data = {
   chainId: number;
   verifyingContract: string;
   message: Record<string, any>;
+};
+
+export type SubmitOffchainVotingProofArguments = {
+  /**
+   * DAO Adapter address
+   */
+  actionId: string;
+  /**
+   * Blockchain network ID
+   */
+  chainId: number;
+  /**
+   * Hex string of the Merkle root
+   */
+  merkleRoot: string;
+  /**
+   * An array of Merkle tree steps
+   */
+  steps: ToStepNodeResult[];
+  /**
+   * DAO Registry address
+   */
+  verifyingContract: string;
+};
+
+/**
+ * Response when calling `GET snapshot-hub/api/:space/offchain_proof/:merkle_root`
+ */
+export type SnapshotOffchainProofResponse = {
+  merkle_root: string;
+  space: string;
+  steps: ToStepNodeResult[];
 };

@@ -36,7 +36,7 @@ describe("buildVoteMessage unit tests", () => {
       space: "tribute",
       token: DEFAULT_VERIFYING_CONTRACT,
       type: "vote",
-      version: undefined,
+      version: "0.1.2",
     });
 
     expect(result.timestamp).toMatch(/^[0-9]{1,}$/);

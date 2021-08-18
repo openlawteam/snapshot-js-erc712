@@ -7,11 +7,13 @@ import {
   SnapshotMessageBase,
   SnapshotMessageProposal,
   SnapshotMessageVote,
+  SnapshotOffchainProofResponse,
   SnapshotProposalData,
   SnapshotSubmitBaseReturn,
   SnapshotType,
   SnapshotVoteData,
   SnapshotVoteProposal,
+  SubmitOffchainVotingProofArguments,
   VoteChoices,
   VoteChoicesIndex,
 } from "./types";
@@ -167,3 +169,66 @@ export const getVotes = (
 export const getApiStatus = (snapshotHubURL: string) => {
   return axios.get(`${snapshotHubURL}/api`);
 };
+
+/**
+ * submitOffchainVotingProof
+ *
+ * Submits a Merkle hex root and its steps to Snapshot Hub
+ * for verification and storage (if successful).
+ *
+ * The API endpoint does not have any return data, only a `201` response.
+ *
+ * @link https://github.com/openlawteam/snapshot-hub
+ */
+export async function submitOffchainVotingProof(
+  snapshotHubURL: string,
+  space: string,
+  data: SubmitOffchainVotingProofArguments
+): Promise<void> {
+  return axios
+    .post(`${snapshotHubURL}/api/${space}/offchain_proofs`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((resp) => resp.data)
+    .catch((err) => {
+      const resp = err.response;
+
+      if (resp.status !== 201) {
+        throw new Error(
+          "Something went wrong while submitting the off-chain vote proof."
+        );
+      }
+    });
+}
+
+/**
+ * getOffchainVotingProof
+ *
+ * Gets a Merkle hex root's steps from Snapshot Hub
+ * for verification.
+ *
+ * @link https://github.com/openlawteam/snapshot-hub
+ */
+export async function getOffchainVotingProof(
+  snapshotHubURL: string,
+  space: string,
+  merkleRootHex: string
+): Promise<SnapshotOffchainProofResponse | undefined> {
+  return axios
+    .get(`${snapshotHubURL}/api/${space}/offchain_proof/${merkleRootHex}`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((error) => {
+      // Return empty if not found
+      if (error.response && error.response.status === 404) {
+        return undefined;
+      }
+
+      throw new Error(
+        "Something went wrong while getting the off-chain vote proof."
+      );
+    });
+}

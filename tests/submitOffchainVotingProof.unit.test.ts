@@ -1,5 +1,5 @@
+import { DEFAULT_SNAPSHOT_HUB_API_URL } from "./msw-mocks/helpers";
 import { rest, server } from "./msw-mocks/server";
-import { SNAPSHOT_HUB_API_URL } from "./msw-mocks/config";
 import { submitOffchainVotingProof } from "../utils";
 
 describe("submitOffchainVotingProof unit tests", () => {
@@ -8,7 +8,7 @@ describe("submitOffchainVotingProof unit tests", () => {
 
     try {
       // Using fake data
-      await submitOffchainVotingProof(SNAPSHOT_HUB_API_URL, "space", {
+      await submitOffchainVotingProof(DEFAULT_SNAPSHOT_HUB_API_URL, "space", {
         verifyingContract: "",
         actionId: "",
         merkleRoot: "",
@@ -28,7 +28,7 @@ describe("submitOffchainVotingProof unit tests", () => {
     // Override default mock as we want access to the `req.body`.
     server.use(
       rest.post(
-        `${SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
+        `${DEFAULT_SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
         (req, res, ctx) => {
           requestBody = req.body;
 
@@ -41,7 +41,7 @@ describe("submitOffchainVotingProof unit tests", () => {
 
     try {
       // Using fake data
-      await submitOffchainVotingProof(SNAPSHOT_HUB_API_URL, "space", {
+      await submitOffchainVotingProof(DEFAULT_SNAPSHOT_HUB_API_URL, "space", {
         verifyingContract: "",
         actionId: "",
         merkleRoot: "",
@@ -53,6 +53,7 @@ describe("submitOffchainVotingProof unit tests", () => {
     }
 
     expect(testError).toBe(undefined);
+
     expect(requestBody).toStrictEqual({
       actionId: "",
       chainId: 1337,
@@ -65,7 +66,7 @@ describe("submitOffchainVotingProof unit tests", () => {
   test("can throw error when server error", async () => {
     server.use(
       rest.post(
-        `${SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
+        `${DEFAULT_SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
         (_req, res, ctx) => res(ctx.status(500))
       )
     );
@@ -74,7 +75,7 @@ describe("submitOffchainVotingProof unit tests", () => {
 
     try {
       // Using fake data
-      await submitOffchainVotingProof(SNAPSHOT_HUB_API_URL, "space", {
+      await submitOffchainVotingProof(DEFAULT_SNAPSHOT_HUB_API_URL, "space", {
         verifyingContract: "",
         actionId: "",
         merkleRoot: "",
@@ -93,7 +94,7 @@ describe("submitOffchainVotingProof unit tests", () => {
   test("can throw error when client error", async () => {
     server.use(
       rest.post(
-        `${SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
+        `${DEFAULT_SNAPSHOT_HUB_API_URL}/api/:spaceName/offchain_proofs`,
         (_req, res, ctx) => res(ctx.status(400))
       )
     );
@@ -102,7 +103,7 @@ describe("submitOffchainVotingProof unit tests", () => {
 
     try {
       // Using fake data
-      await submitOffchainVotingProof(SNAPSHOT_HUB_API_URL, "space", {
+      await submitOffchainVotingProof(DEFAULT_SNAPSHOT_HUB_API_URL, "space", {
         verifyingContract: "",
         actionId: "",
         merkleRoot: "",

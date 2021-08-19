@@ -7,6 +7,7 @@ import {
   DEFAULT_VERIFYING_CONTRACT,
 } from "./utils";
 import { buildVoteMessage, VoteChoices } from "../index";
+import { DEFAULT_SNAPSHOT_HUB_API_URL } from "./msw-mocks/helpers";
 import { server } from "./msw-mocks";
 
 describe("buildVoteMessage unit tests", () => {
@@ -22,7 +23,7 @@ describe("buildVoteMessage unit tests", () => {
         space: "tribute",
         token: DEFAULT_VERIFYING_CONTRACT,
       },
-      "http://localhost:3000"
+      DEFAULT_SNAPSHOT_HUB_API_URL
     );
 
     expect(result).toMatchObject({
@@ -43,7 +44,11 @@ describe("buildVoteMessage unit tests", () => {
   });
 
   test("should throw on error", async () => {
-    server.use(rest.get("*/api", (_req, res, ctx) => res(ctx.status(500))));
+    server.use(
+      rest.get(`${DEFAULT_SNAPSHOT_HUB_API_URL}/api`, (_req, res, ctx) =>
+        res(ctx.status(500))
+      )
+    );
 
     try {
       await buildVoteMessage(
@@ -57,7 +62,7 @@ describe("buildVoteMessage unit tests", () => {
           space: "tribute",
           token: DEFAULT_VERIFYING_CONTRACT,
         },
-        "http://localhost:3000"
+        DEFAULT_SNAPSHOT_HUB_API_URL
       );
     } catch (error) {
       expect(error.message.length > 0).toBe(true);

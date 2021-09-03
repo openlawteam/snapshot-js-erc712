@@ -9,6 +9,7 @@ export type PrepareVoteProposalData = {
     snapshot: string;
     start: number;
   };
+  submitter: string;
   sig: string;
   space: string;
   timestamp: number;

@@ -593,6 +593,7 @@ export function prepareVoteProposalData(
       ProposalMessage: {
         timestamp: "uint64",
         spaceHash: "bytes32",
+        submitter: "address",
         payload: {
           nameHash: "bytes32",
           bodyHash: "bytes32",
@@ -607,6 +608,7 @@ export function prepareVoteProposalData(
     {
       timestamp: data.timestamp,
       spaceHash: sha3(data.space),
+      submitter: data.submitter,
       payload: prepareVoteProposalPayload(data.payload),
       sig: data.sig || "0x",
     }

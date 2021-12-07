@@ -108,6 +108,8 @@ export const getDomainDefinition = (
       );
     case "coupon":
       return getCouponDomainDefinition(verifyingContract, actionId, chainId);
+    case "coupon-kyc":
+      return getCouponKycDomainDefinition(verifyingContract, actionId, chainId);
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -258,6 +260,21 @@ export const getCouponDomainDefinition = (
   return { domain, types };
 };
 
+export const getCouponKycDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [{ name: "kycedMember", type: "address" }],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -284,6 +301,8 @@ export const prepareMessage = (message: MessageWithType) => {
     case "result":
       return message;
     case "coupon":
+      return message;
+    case "coupon-kyc":
       return message;
     default:
       throw new Error("unknown type " + message.type);

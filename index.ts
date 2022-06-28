@@ -110,6 +110,8 @@ export const getDomainDefinition = (
       return getCouponDomainDefinition(verifyingContract, actionId, chainId);
     case "coupon-kyc":
       return getCouponKycDomainDefinition(verifyingContract, actionId, chainId);
+    case "manager-coupon":
+      return getManagerCouponDomainDefinition(verifyingContract, actionId, chainId);
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -275,6 +277,43 @@ export const getCouponKycDomainDefinition = (
   return { domain, types };
 };
 
+export const getManagerCouponDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [
+      { name: "daoAddress", type: "address" },
+      { name: "proposal", type: "ProposalDetails" },
+      { name: "configs", type: "Configuration[]" },
+      { name: "nonce", type: "uint256" },
+      { name: "proposalId", type: "bytes32" },
+    ],
+    ProposalDetails: [
+      { name: "adapterOrExtensionId", type: "bytes32" },
+      { name: "adapterOrExtensionAddr", type: "address" },
+      { name: "updateType", type: "uint8" },
+      { name: "flags", type: "uint128" },
+      { name: "keys", type: "bytes32[]" },
+      { name: "values", type: "uint256[]" },
+      { name: "extensionAddresses", type: "address[]" },
+      { name: "extensionAclFlags", type: "uint128[]" },
+    ],
+    Configuration: [
+      { name: "key", type: "bytes32" },
+      { name: "numericValue", type: "uint256" },
+      { name: "addressValue", type: "address" },
+      { name: "configType", type: "uint8" },
+    ],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -303,6 +342,8 @@ export const prepareMessage = (message: MessageWithType) => {
     case "coupon":
       return message;
     case "coupon-kyc":
+      return message;
+    case "manager-coupon":
       return message;
     default:
       throw new Error("unknown type " + message.type);

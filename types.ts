@@ -80,7 +80,7 @@ export type PrepareProposalPayloadReturn = {
 };
 
 export type MessageWithType = Record<string, any> & {
-  type: SnapshotType | "result" | "coupon" | "coupon-kyc";
+  type: SnapshotType | "result" | "coupon" | "coupon-kyc" | "manager-coupon";
 };
 
 export type VoteEntry = {

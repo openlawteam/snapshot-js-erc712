@@ -270,7 +270,10 @@ export const getCouponKycDomainDefinition = (
   const domain = getMessageDomainType(chainId, verifyingContract, actionId);
 
   const types = {
-    Message: [{ name: "kycedMember", type: "address" }],
+    Message: [
+      { name: "kycedMember", type: "address" }, 
+      { name: "memberNonce", type: "uint256"}
+    ],
     EIP712Domain: getDomainType(),
   };
 

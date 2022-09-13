@@ -367,6 +367,8 @@ export const prepareMessage = (message: MessageWithType) => {
       return message;
     case "manager-coupon":
       return message;
+    case "coupon-nft": 
+      return message;
     default:
       throw new Error("unknown type " + message.type);
   }

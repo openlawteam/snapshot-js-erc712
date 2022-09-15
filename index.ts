@@ -112,6 +112,8 @@ export const getDomainDefinition = (
       return getCouponKycDomainDefinition(verifyingContract, actionId, chainId);
     case "manager-coupon":
       return getManagerCouponDomainDefinition(verifyingContract, actionId, chainId);
+    case "coupon-nft":
+      return getNftCouponDomainDefinition(verifyingContract, actionId, chainId);
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -316,6 +318,24 @@ export const getManagerCouponDomainDefinition = (
   return { domain, types };
 };
 
+export const getNftCouponDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [
+      { name: "owner", type: "address" },
+      { name: "nonce", type: "uint256" },
+    ],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -346,6 +366,8 @@ export const prepareMessage = (message: MessageWithType) => {
     case "coupon-kyc":
       return message;
     case "manager-coupon":
+      return message;
+    case "coupon-nft": 
       return message;
     default:
       throw new Error("unknown type " + message.type);

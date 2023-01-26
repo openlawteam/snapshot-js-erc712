@@ -111,9 +111,19 @@ export const getDomainDefinition = (
     case "coupon-kyc":
       return getCouponKycDomainDefinition(verifyingContract, actionId, chainId);
     case "manager-coupon":
-      return getManagerCouponDomainDefinition(verifyingContract, actionId, chainId);
+      return getManagerCouponDomainDefinition(
+        verifyingContract,
+        actionId,
+        chainId
+      );
     case "coupon-nft":
       return getNftCouponDomainDefinition(verifyingContract, actionId, chainId);
+    case "coupon-burn":
+      return getCouponBurnDomainDefinition(
+        verifyingContract,
+        actionId,
+        chainId
+      );
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -273,8 +283,8 @@ export const getCouponKycDomainDefinition = (
 
   const types = {
     Message: [
-      { name: "kycedMember", type: "address" }, 
-      { name: "memberNonce", type: "uint256"}
+      { name: "kycedMember", type: "address" },
+      { name: "memberNonce", type: "uint256" },
     ],
     EIP712Domain: getDomainType(),
   };
@@ -336,6 +346,25 @@ export const getNftCouponDomainDefinition = (
   return { domain, types };
 };
 
+export const getCouponBurnDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [
+      { name: "authorizedMember", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+    ],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -367,7 +396,9 @@ export const prepareMessage = (message: MessageWithType) => {
       return message;
     case "manager-coupon":
       return message;
-    case "coupon-nft": 
+    case "coupon-nft":
+      return message;
+    case "coupon-burn":
       return message;
     default:
       throw new Error("unknown type " + message.type);

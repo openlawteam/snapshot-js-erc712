@@ -124,6 +124,12 @@ export const getDomainDefinition = (
         actionId,
         chainId
       );
+    case "coupon-update-delegate-key":
+      return getCouponUpdateDelegateKeyDomainDefinition(
+        verifyingContract,
+        actionId,
+        chainId
+      );
     default:
       throw new Error("unknown type " + message.type);
   }
@@ -365,6 +371,25 @@ export const getCouponBurnDomainDefinition = (
   return { domain, types };
 };
 
+export const getCouponUpdateDelegateKeyDomainDefinition = (
+  verifyingContract: string,
+  actionId: string,
+  chainId: number
+) => {
+  const domain = getMessageDomainType(chainId, verifyingContract, actionId);
+
+  const types = {
+    Message: [
+      { name: "authorizedMember", type: "address" },
+      { name: "newDelegateKey", type: "address" },
+      { name: "nonce", type: "uint256" },
+    ],
+    EIP712Domain: getDomainType(),
+  };
+
+  return { domain, types };
+};
+
 export const getDomainType = () => {
   return [
     { name: "name", type: "string" },
@@ -399,6 +424,8 @@ export const prepareMessage = (message: MessageWithType) => {
     case "coupon-nft":
       return message;
     case "coupon-burn":
+      return message;
+    case "coupon-update-delegate-key":
       return message;
     default:
       throw new Error("unknown type " + message.type);

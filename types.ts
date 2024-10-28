@@ -87,7 +87,8 @@ export type MessageWithType = Record<string, any> & {
     | "coupon-kyc"
     | "manager-coupon"
     | "coupon-nft"
-    | "coupon-burn";
+    | "coupon-burn"
+    | "coupon-update-delegate-key";
 };
 
 export type VoteEntry = {
